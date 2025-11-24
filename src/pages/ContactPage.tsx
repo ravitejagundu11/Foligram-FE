@@ -1,63 +1,65 @@
+import '../styles/ContactPage.css'
+
 const ContactPage = () => {
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-4xl font-bold text-gray-900 mb-6">Contact Us</h1>
-      <p className="text-lg text-gray-600 mb-8">
+    <div className="contact-container">
+      <h1 className="contact-title">Contact Us</h1>
+      <p className="contact-subtitle">
         Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
       </p>
       
-      <form className="space-y-6">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+      <form className="contact-form">
+        <div className="form-group">
+          <label htmlFor="name" className="form-label">
             Name *
           </label>
           <input
             type="text"
             id="name"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="contact-input"
             placeholder="Your name"
           />
         </div>
         
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="form-group">
+          <label htmlFor="email" className="form-label">
             Email *
           </label>
           <input
             type="email"
             id="email"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="contact-input"
             placeholder="your.email@example.com"
           />
         </div>
         
-        <div>
-          <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="form-group">
+          <label htmlFor="subject" className="form-label">
             Subject *
           </label>
           <input
             type="text"
             id="subject"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="contact-input"
             placeholder="How can we help?"
           />
         </div>
         
-        <div>
-          <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="form-group">
+          <label htmlFor="message" className="form-label">
             Message *
           </label>
           <textarea
             id="message"
             rows={6}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="contact-textarea"
             placeholder="Your message..."
           />
         </div>
         
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          className="contact-button"
         >
           Send Message
         </button>
