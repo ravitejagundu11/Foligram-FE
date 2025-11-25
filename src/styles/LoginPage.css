@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .login-container {
+    @apply min-h-screen bg-gradient-to-br from-white to-gray-50 flex items-center justify-center px-4;
+  }
+
+  .login-card {
+    @apply w-full max-w-md bg-white rounded-lg shadow-lg p-8;
+  }
+
+  .login-title {
+    @apply text-3xl font-bold text-black mb-2 text-center;
+  }
+
+  .login-subtitle {
+    @apply text-gray-600 text-center mb-8;
+  }
+
+  .login-error {
+    @apply bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6;
+  }
+
+  .login-form {
+    @apply space-y-6;
+  }
+
+  .login-form-input {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg bg-white transition;
+  }
+
+  .login-form-input:focus {
+    @apply outline-none border-black ring-2 ring-black;
+  }
+
+  .input-error {
+    @apply border-red-500;
+  }
+
+  .login-button {
+    @apply w-full px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-900 transition-colors duration-200;
+  }
+  .login-divider {
+    @apply mt-6 pt-6 border-t border-gray-200 text-center;
+  }
+
+  .login-divider-text {
+    @apply text-gray-600;
+  }
+
+  .login-signup-link {
+    @apply text-black font-semibold hover:text-black transition-colors;
+  }
+}

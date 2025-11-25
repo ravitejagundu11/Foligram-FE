@@ -1,4 +1,10 @@
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@contexts/AuthContext'
+
 const DashboardPage = () => {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+
   const stats = [
     { label: 'Total Projects', value: '24', change: '+12%' },
     { label: 'Views', value: '1,234', change: '+8%' },
@@ -8,9 +14,25 @@ const DashboardPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p className="text-gray-600">Welcome back! Here's an overview of your portfolio.</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
+          <p className="text-gray-600">Welcome back! Here's an overview of your portfolio.</p>
+        </div>
+        <button
+          onClick={() => navigate('/profile')}
+          className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:bg-gray-800 transition-colors"
+          title="Go to Profile"
+        >
+          {user?.profileImage ? (
+            <img src={user.profileImage} alt="Profile" className="w-full h-full rounded-full object-cover" />
+          ) : (
+            <span className="text-lg font-bold">
+              {user?.firstName?.charAt(0)}
+              {user?.lastName?.charAt(0)}
+            </span>
+          )}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
