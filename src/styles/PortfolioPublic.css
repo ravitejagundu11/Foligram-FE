@@ -50,6 +50,8 @@
   color: white;
   padding: 100px 20px;
   text-align: center;
+  position: relative;
+  z-index: 10;
 }
 
 .hero-content {
@@ -105,6 +107,8 @@
   text-decoration: none;
   margin-top: 20px;
   transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  z-index: 20;
 }
 
 .contact-button:hover {
@@ -141,6 +145,8 @@
 /* Projects Section */
 .projects-section {
   background-color: #f9fafb;
+  position: relative;
+  z-index: 1;
 }
 
 .projects-grid {
@@ -155,6 +161,9 @@
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
 
 .project-card:hover {
@@ -540,6 +549,12 @@
 /* Project Overlay */
 .project-card {
   cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+
+.project-image {
+  position: relative;
 }
 
 .project-overlay {
@@ -554,6 +569,7 @@
   justify-content: center;
   opacity: 0;
   transition: opacity 0.3s;
+  z-index: 2;
 }
 
 .project-card:hover .project-overlay {

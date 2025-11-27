@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   ExternalLink, 
@@ -31,6 +31,7 @@ interface ContactFormData {
 
 const PortfolioPublic = () => {
   const { username, portfolioId } = useParams<{ username?: string; portfolioId?: string }>()
+  const navigate = useNavigate()
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [skills, setSkills] = useState<Skill[]>([])
@@ -62,7 +63,204 @@ const PortfolioPublic = () => {
       try {
         setLoading(true)
         
-        // Fetch public portfolio data (includes view tracking)
+        // Mock data for demonstration (remove when backend is ready)
+        const mockPortfolio: Portfolio = {
+          id: '1',
+          userId: 'user1',
+          name: 'Sarah Johnson',
+          contactEmail: 'sarah.johnson@example.com',
+          slug: 'sarahjohnson',
+          templateId: 'modern-minimal',
+          headline: 'Full-Stack Developer & UI/UX Enthusiast',
+          description: 'Passionate about creating beautiful, functional, and user-centered digital experiences. With 5+ years of experience in web development, I specialize in React, Node.js, and modern web technologies.',
+          profilePicture: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
+          theme: {
+            primaryColor: '#667eea',
+            secondaryColor: '#764ba2',
+            accentColor: '#10b981',
+            backgroundColor: '#ffffff',
+            textColor: '#1f2937'
+          },
+          typography: {
+            headingFont: 'Inter',
+            bodyFont: 'Inter',
+            fontSize: 'medium'
+          },
+          layout: {
+            headerStyle: 'centered',
+            spacing: 'comfortable',
+            cardStyle: 'rounded'
+          },
+          sections: {
+            about: true,
+            experience: true,
+            education: true,
+            projects: true,
+            skills: true,
+            contact: true
+          },
+          socialLinks: {
+            github: 'https://github.com/sarahjohnson',
+            linkedin: 'https://linkedin.com/in/sarahjohnson',
+            twitter: 'https://twitter.com/sarahjohnson',
+            website: 'https://sarahjohnson.dev'
+          },
+          isPublished: true,
+          views: 1250,
+          likes: 89,
+          createdAt: '2024-01-15T10:00:00Z',
+          updatedAt: '2024-11-20T15:30:00Z'
+        }
+
+        const mockProjects: Project[] = [
+          {
+            id: '1',
+            portfolioId: '1',
+            title: 'E-Commerce Platform',
+            description: 'A full-featured e-commerce platform built with React, Node.js, and MongoDB. Includes user authentication, product management, shopping cart, payment integration with Stripe, and an admin dashboard for managing orders and inventory.',
+            images: [
+              'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&h=500&fit=crop',
+              'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=500&fit=crop',
+              'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=500&fit=crop'
+            ],
+            techStack: ['React', 'Node.js', 'MongoDB', 'Express', 'Stripe', 'Redux', 'Tailwind CSS'],
+            demoUrl: 'https://ecommerce-demo.example.com',
+            codeUrl: 'https://github.com/sarahjohnson/ecommerce-platform',
+            featured: true,
+            order: 0,
+            createdAt: '2024-03-10T10:00:00Z',
+            updatedAt: '2024-11-15T12:00:00Z'
+          },
+          {
+            id: '2',
+            portfolioId: '1',
+            title: 'Task Management App',
+            description: 'A collaborative task management application with real-time updates using Socket.io. Features include drag-and-drop kanban boards, team collaboration, file attachments, and deadline tracking.',
+            images: [
+              'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=500&fit=crop',
+              'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=800&h=500&fit=crop'
+            ],
+            techStack: ['React', 'TypeScript', 'Socket.io', 'PostgreSQL', 'Material-UI'],
+            demoUrl: 'https://taskmanager-demo.example.com',
+            codeUrl: 'https://github.com/sarahjohnson/task-manager',
+            featured: true,
+            order: 1,
+            createdAt: '2024-05-20T10:00:00Z',
+            updatedAt: '2024-10-22T14:30:00Z'
+          },
+          {
+            id: '3',
+            portfolioId: '1',
+            title: 'Weather Dashboard',
+            description: 'A beautiful weather dashboard that displays current weather, 7-day forecast, and weather maps. Integrates with OpenWeather API and uses geolocation for automatic location detection.',
+            images: [
+              'https://images.unsplash.com/photo-1592210454359-9043f067919b?w=800&h=500&fit=crop'
+            ],
+            techStack: ['React', 'Next.js', 'OpenWeather API', 'Chart.js', 'CSS Modules'],
+            demoUrl: 'https://weather-dashboard.example.com',
+            codeUrl: 'https://github.com/sarahjohnson/weather-dashboard',
+            featured: false,
+            order: 2,
+            createdAt: '2024-07-08T10:00:00Z',
+            updatedAt: '2024-09-15T11:20:00Z'
+          },
+          {
+            id: '4',
+            portfolioId: '1',
+            title: 'Blog CMS',
+            description: 'A modern content management system for bloggers with markdown support, SEO optimization, and analytics. Built with a headless architecture for flexibility.',
+            images: [
+              'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=500&fit=crop'
+            ],
+            techStack: ['Next.js', 'GraphQL', 'Prisma', 'PostgreSQL', 'AWS S3'],
+            demoUrl: 'https://blog-cms-demo.example.com',
+            codeUrl: 'https://github.com/sarahjohnson/blog-cms',
+            featured: false,
+            order: 3,
+            createdAt: '2024-08-12T10:00:00Z',
+            updatedAt: '2024-11-01T16:45:00Z'
+          }
+        ]
+
+        const mockSkills: Skill[] = [
+          // Frontend
+          { id: '1', portfolioId: '1', name: 'React', category: 'Frontend', proficiency: 5, order: 0 },
+          { id: '2', portfolioId: '1', name: 'Next.js', category: 'Frontend', proficiency: 4, order: 1 },
+          { id: '3', portfolioId: '1', name: 'TypeScript', category: 'Frontend', proficiency: 5, order: 2 },
+          { id: '4', portfolioId: '1', name: 'Vue.js', category: 'Frontend', proficiency: 3, order: 3 },
+          { id: '5', portfolioId: '1', name: 'Tailwind CSS', category: 'Frontend', proficiency: 5, order: 4 },
+          { id: '6', portfolioId: '1', name: 'Redux', category: 'Frontend', proficiency: 4, order: 5 },
+          
+          // Backend
+          { id: '7', portfolioId: '1', name: 'Node.js', category: 'Backend', proficiency: 5, order: 0 },
+          { id: '8', portfolioId: '1', name: 'Express', category: 'Backend', proficiency: 5, order: 1 },
+          { id: '9', portfolioId: '1', name: 'GraphQL', category: 'Backend', proficiency: 4, order: 2 },
+          { id: '10', portfolioId: '1', name: 'REST API', category: 'Backend', proficiency: 5, order: 3 },
+          { id: '11', portfolioId: '1', name: 'Python', category: 'Backend', proficiency: 3, order: 4 },
+          
+          // Database
+          { id: '12', portfolioId: '1', name: 'MongoDB', category: 'Database', proficiency: 4, order: 0 },
+          { id: '13', portfolioId: '1', name: 'PostgreSQL', category: 'Database', proficiency: 4, order: 1 },
+          { id: '14', portfolioId: '1', name: 'Redis', category: 'Database', proficiency: 3, order: 2 },
+          { id: '15', portfolioId: '1', name: 'Prisma', category: 'Database', proficiency: 4, order: 3 },
+          
+          // DevOps
+          { id: '16', portfolioId: '1', name: 'Docker', category: 'DevOps', proficiency: 4, order: 0 },
+          { id: '17', portfolioId: '1', name: 'AWS', category: 'DevOps', proficiency: 3, order: 1 },
+          { id: '18', portfolioId: '1', name: 'CI/CD', category: 'DevOps', proficiency: 4, order: 2 },
+          { id: '19', portfolioId: '1', name: 'Git', category: 'DevOps', proficiency: 5, order: 3 },
+          
+          // Tools
+          { id: '20', portfolioId: '1', name: 'Figma', category: 'Tools', proficiency: 4, order: 0 },
+          { id: '21', portfolioId: '1', name: 'VS Code', category: 'Tools', proficiency: 5, order: 1 },
+          { id: '22', portfolioId: '1', name: 'Postman', category: 'Tools', proficiency: 5, order: 2 },
+          { id: '23', portfolioId: '1', name: 'Jira', category: 'Tools', proficiency: 4, order: 3 }
+        ]
+
+        const mockTestimonials: Testimonial[] = [
+          {
+            id: '1',
+            portfolioId: '1',
+            name: 'Michael Chen',
+            role: 'Senior Product Manager',
+            company: 'TechCorp Inc.',
+            content: 'Sarah is an exceptional developer who consistently delivers high-quality work. Her attention to detail and ability to understand complex requirements makes her a valuable asset to any team. She led our e-commerce platform redesign and exceeded all expectations.',
+            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop',
+            rating: 5,
+            order: 0,
+            createdAt: '2024-09-15T10:00:00Z'
+          },
+          {
+            id: '2',
+            portfolioId: '1',
+            name: 'Emily Rodriguez',
+            role: 'CEO',
+            company: 'StartupHub',
+            content: 'Working with Sarah was a game-changer for our company. She not only delivered a beautiful and functional product but also provided valuable insights that improved our overall user experience. Her technical expertise and communication skills are outstanding.',
+            avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop',
+            rating: 5,
+            order: 1,
+            createdAt: '2024-10-02T14:30:00Z'
+          },
+          {
+            id: '3',
+            portfolioId: '1',
+            name: 'David Thompson',
+            role: 'Lead Developer',
+            company: 'Digital Solutions',
+            content: 'Sarah\'s code quality is exceptional. She writes clean, maintainable code and always follows best practices. Her problem-solving skills and ability to work under pressure make her an excellent team player. Highly recommended!',
+            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop',
+            rating: 5,
+            order: 2,
+            createdAt: '2024-10-20T09:15:00Z'
+          }
+        ]
+
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 800))
+
+        // Uncomment below when backend is ready
+        /*
         const endpoint = username 
           ? `/portfolios/public/${username}` 
           : `/portfolios/${identifier}/public`
@@ -78,6 +276,13 @@ const PortfolioPublic = () => {
         setProjects(portfolioData.projects)
         setSkills(portfolioData.skills)
         setTestimonials(portfolioData.testimonials)
+        */
+
+        // Using mock data
+        setPortfolio(mockPortfolio)
+        setProjects(mockProjects)
+        setSkills(mockSkills)
+        setTestimonials(mockTestimonials)
       } catch (err) {
         console.error('Error fetching portfolio:', err)
         setError('Failed to load portfolio. Please try again later.')
@@ -304,8 +509,8 @@ const PortfolioPublic = () => {
           )}
           
           {portfolio.contactEmail && (
-            <motion.a 
-              href="#contact" 
+            <motion.button
+              onClick={() => navigate('/booking-page')}
               className="contact-button"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -313,7 +518,7 @@ const PortfolioPublic = () => {
             >
               <Mail size={20} />
               Get in Touch
-            </motion.a>
+            </motion.button>
           )}
         </div>
       </section>

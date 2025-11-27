@@ -25,6 +25,8 @@ import UserSearchPage from '@pages/UserSearchPage'
 import AnalyticsPage from '@pages/AnalyticsPage'
 import NotificationsPage from '@pages/NotificationsPage'
 import NotFound from '@pages/NotFound'
+import AppointmentManagement from './pages/AppointmentManagement'
+import BookingPage from './pages/BookingPage'
 
 function App() {
   return (
@@ -61,6 +63,8 @@ function App() {
               <Route path="contact" element={<ContactPage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="signup" element={<SignUpPage />} />
+              <Route path="appointment-management" element={<AppointmentManagement/>} />
+              <Route path="booking-page" element={<BookingPage/>} />
               <Route
                 path="dashboard"
                 element={
