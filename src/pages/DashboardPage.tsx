@@ -19,7 +19,7 @@ const DashboardPage = () => {
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
           <p className="text-gray-600">Welcome back! Here's an overview of your portfolio.</p>
         </div>
-        <button
+        {/* <button
           onClick={() => navigate('/profile')}
           className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:bg-gray-800 transition-colors"
           title="Go to Profile"
@@ -32,7 +32,7 @@ const DashboardPage = () => {
               {user?.lastName?.charAt(0)}
             </span>
           )}
-        </button>
+        </button> */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
