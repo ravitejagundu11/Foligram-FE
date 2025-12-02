@@ -195,25 +195,48 @@ const Layout = () => {
 
           {/* Bottom Actions */}
           <div className="sidebar-bottom">
-            <button 
-              className="sidebar-nav-item settings-btn" 
-              title="Settings" 
-              onClick={() => navigate('/profile')}
-            >
-              <Settings size={24} />
-              {!isSidebarCollapsed && <span className="nav-label">Settings</span>}
-              {isSidebarCollapsed && <span className="nav-tooltip">Settings</span>}
-            </button>
-            {isAuthenticated && (
-              <button
-                className="sidebar-nav-item logout-btn"
-                onClick={handleLogout}
-                title="Logout"
-              >
-                <LogOut size={24} />
-                {!isSidebarCollapsed && <span className="nav-label">Logout</span>}
-                {isSidebarCollapsed && <span className="nav-tooltip">Logout</span>}
-              </button>
+            {isAuthenticated ? (
+              <>
+                <button 
+                  className="sidebar-nav-item settings-btn" 
+                  title="Settings" 
+                  onClick={() => navigate('/profile')}
+                >
+                  <Settings size={24} />
+                  {!isSidebarCollapsed && <span className="nav-label">Settings</span>}
+                  {isSidebarCollapsed && <span className="nav-tooltip">Settings</span>}
+                </button>
+                <button
+                  className="sidebar-nav-item logout-btn"
+                  onClick={handleLogout}
+                  title="Logout"
+                >
+                  <LogOut size={24} />
+                  {!isSidebarCollapsed && <span className="nav-label">Logout</span>}
+                  {isSidebarCollapsed && <span className="nav-tooltip">Logout</span>}
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="sidebar-nav-item signin-btn"
+                  onClick={() => navigate('/login')}
+                  title="Sign In"
+                >
+                  <UserCircle size={24} />
+                  {!isSidebarCollapsed && <span className="nav-label">Sign In</span>}
+                  {isSidebarCollapsed && <span className="nav-tooltip">Sign In</span>}
+                </button>
+                <button
+                  className="sidebar-nav-item signup-btn"
+                  onClick={() => navigate('/signup')}
+                  title="Sign Up"
+                >
+                  <User size={24} />
+                  {!isSidebarCollapsed && <span className="nav-label">Sign Up</span>}
+                  {isSidebarCollapsed && <span className="nav-tooltip">Sign Up</span>}
+                </button>
+              </>
             )}
           </div>
         </div>

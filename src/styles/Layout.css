@@ -264,6 +264,42 @@
   color: white;
 }
 
+/* Sign In Button - Blue */
+.sidebar-nav-item.signin-btn {
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+  font-weight: 600;
+}
+
+.sidebar-nav-item.signin-btn:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.sidebar-nav-item.signin-btn.active {
+  background: #2563eb;
+  color: white;
+}
+
+/* Sign Up Button - Green */
+.sidebar-nav-item.signup-btn {
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.1);
+  font-weight: 600;
+}
+
+.sidebar-nav-item.signup-btn:hover {
+  background: #dcfce7;
+  color: #15803d;
+  transform: translateY(-2px);
+}
+
+.sidebar-nav-item.signup-btn.active {
+  background: #16a34a;
+  color: white;
+}
+
 /* Top Right Profile */
 .layout-profile {
   position: fixed;
