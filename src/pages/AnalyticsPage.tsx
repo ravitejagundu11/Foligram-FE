@@ -24,7 +24,7 @@ import {
   PolarRadiusAxis,
   Radar,
 } from "recharts";
-import { Eye, Heart, ExternalLink, Trash2, EyeOff, Upload, FileText, MessageCircle, Share2, BarChart, TrendingUp, Calendar } from "lucide-react";
+import { Eye, Heart, ExternalLink, Trash2, EyeOff, Upload, FileText, MessageCircle, Share2, BarChart } from "lucide-react";
 import { apiClient } from "../services/api";
 import type { Portfolio } from "../types/portfolio";
 import type { BlogPost } from "../types/blog";
@@ -38,6 +38,8 @@ export default function AnalyticsPage() {
   const [allBlogPosts, setAllBlogPosts] = useState<BlogPost[]>([]);
   const [showUnpublishedPosts, setShowUnpublishedPosts] = useState(false);
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
+  const [subscribers, setSubscribers] = useState<any[]>([]);
+  const [mySubscriptions, setMySubscriptions] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadPortfolios() {
@@ -89,7 +91,113 @@ export default function AnalyticsPage() {
 
     loadPortfolios();
     loadBlogPosts();
+    loadSubscribers();
   }, []);
+
+  async function loadSubscribers() {
+    try {
+      // Try to fetch subscribers from backend API
+      const response = await apiClient.get<any[]>('/subscriptions/me/subscribers');
+      setSubscribers(response);
+      
+      // Load my subscriptions
+      const mySubsResponse = await apiClient.get<any[]>('/subscriptions/me');
+      setMySubscriptions(mySubsResponse);
+    } catch (err) {
+      console.warn('Backend API not available, loading subscribers from localStorage');
+      
+      // Fallback: Load from localStorage
+      const allSubscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}');
+      const currentUserId = localStorage.getItem('currentUserId') || 'current-user';
+      
+      // Get subscribers (users who subscribed to me)
+      const mySubscribersList = Object.entries(allSubscriptions)
+        .filter(([_, sub]: [string, any]) => sub.subscribedTo === currentUserId)
+        .map(([portfolioId, sub]: [string, any]) => ({
+          id: portfolioId,
+          subscriberId: sub.subscriberId || 'unknown',
+          subscriberName: sub.subscriberName || 'Anonymous User',
+          subscriberEmail: sub.subscriberEmail || '',
+          subscribedAt: sub.subscribedAt,
+          portfolioId: portfolioId
+        }));
+      
+      setSubscribers(mySubscribersList);
+      
+      // Get my subscriptions (portfolios I subscribed to)
+      const mySubsList = Object.entries(allSubscriptions)
+        .filter(([_, sub]: [string, any]) => sub.subscriberId === currentUserId)
+        .map(([portfolioId, sub]: [string, any]) => ({
+          portfolioId,
+          subscribedAt: sub.subscribedAt
+        }));
+      
+      setMySubscriptions(mySubsList);
+    }
+  }
+
+  const handleRemoveSubscriber = async (subscriberId: string, portfolioId: string) => {
+    if (!window.confirm('Remove this subscriber? They will no longer receive updates.')) return;
+    
+    try {
+      await apiClient.delete(`/subscriptions/${portfolioId}/subscriber/${subscriberId}`);
+      setSubscribers(subscribers.filter(s => s.subscriberId !== subscriberId));
+      alert('✓ Subscriber removed successfully!');
+    } catch (err) {
+      console.warn('Backend API not available, removing from localStorage');
+      
+      // Fallback: Remove from localStorage
+      const allSubscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}');
+      delete allSubscriptions[portfolioId];
+      localStorage.setItem('subscriptions', JSON.stringify(allSubscriptions));
+      
+      setSubscribers(subscribers.filter(s => s.id !== portfolioId));
+      alert('✓ Subscriber removed successfully!');
+    }
+  };
+
+  const handleSubscribeBack = async (portfolioId: string, subscriberName: string) => {
+    // Check if already subscribed
+    const alreadySubscribed = mySubscriptions.some(sub => sub.portfolioId === portfolioId);
+    
+    if (alreadySubscribed) {
+      alert('You are already subscribed to this user!');
+      return;
+    }
+    
+    try {
+      await apiClient.post('/subscriptions', {
+        portfolioId,
+        subscribedAt: new Date().toISOString()
+      });
+      
+      const newSub = { portfolioId, subscribedAt: new Date().toISOString() };
+      setMySubscriptions([...mySubscriptions, newSub]);
+      alert(`✓ Successfully subscribed to ${subscriberName}!`);
+    } catch (err) {
+      console.warn('Backend API not available, saving to localStorage');
+      
+      // Fallback: Save to localStorage
+      const allSubscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}');
+      const currentUserId = localStorage.getItem('currentUserId') || 'current-user';
+      
+      allSubscriptions[portfolioId] = {
+        portfolioId,
+        subscriberId: currentUserId,
+        subscribedAt: new Date().toISOString()
+      };
+      
+      localStorage.setItem('subscriptions', JSON.stringify(allSubscriptions));
+      
+      const newSub = { portfolioId, subscribedAt: new Date().toISOString() };
+      setMySubscriptions([...mySubscriptions, newSub]);
+      alert(`✓ Successfully subscribed to ${subscriberName}!`);
+    }
+  };
+
+  const isSubscribedTo = (portfolioId: string) => {
+    return mySubscriptions.some(sub => sub.portfolioId === portfolioId);
+  };
 
   const handleDeletePortfolio = async (portfolioId: string) => {
     if (!window.confirm('Are you sure you want to delete this portfolio? This action cannot be undone.')) return;
@@ -592,6 +700,84 @@ export default function AnalyticsPage() {
                           </button>
                         </>
                       )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* SUBSCRIBERS SECTION */}
+      <Card className="shadow-md rounded-xl border border-gray-200">
+        <CardContent className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-800">My Subscribers</h2>
+            <span className="text-sm text-gray-600">
+              {subscribers.length} subscriber{subscribers.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          {subscribers.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <Heart size={48} className="mx-auto mb-3 text-gray-300" />
+              <p>No subscribers yet. Keep creating great content!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {subscribers.map((subscriber) => {
+                const isSubscribed = isSubscribedTo(subscriber.portfolioId);
+                
+                return (
+                  <div
+                    key={subscriber.id}
+                    className="border rounded-lg p-4 hover:shadow-lg transition bg-white"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg truncate flex items-center gap-2">
+                          <Eye size={18} className="text-indigo-500" />
+                          {subscriber.subscriberName}
+                        </h3>
+                        {subscriber.subscriberEmail && (
+                          <p className="text-sm text-gray-500 truncate">{subscriber.subscriberEmail}</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="text-xs text-gray-400 mb-3">
+                      Subscribed: {new Date(subscriber.subscribedAt).toLocaleDateString()}
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {isSubscribed ? (
+                        <button
+                          className="flex items-center justify-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded-md text-sm flex-1"
+                          disabled
+                          title="Already subscribed"
+                        >
+                          <Heart size={14} className="fill-current" />
+                          Subscribed
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleSubscribeBack(subscriber.portfolioId, subscriber.subscriberName)}
+                          className="flex items-center justify-center gap-1 px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm flex-1"
+                          title="Subscribe back"
+                        >
+                          <Heart size={14} />
+                          Subscribe Back
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleRemoveSubscriber(subscriber.subscriberId, subscriber.portfolioId)}
+                        className="flex items-center justify-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
+                        title="Remove subscriber"
+                      >
+                        <Trash2 size={14} />
+                        Remove
+                      </button>
                     </div>
                   </div>
                 );
