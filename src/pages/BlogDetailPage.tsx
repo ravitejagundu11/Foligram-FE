@@ -3,12 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useBlog } from '@contexts/BlogContext'
 import { useAuth } from '@contexts/AuthContext'
 import UserProfileModal from '@components/UserProfileModal'
+import { Flag, X } from 'lucide-react'
 import '../styles/BlogDetailPage.css'
 
 const BlogDetailPage = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { getPostById, likePost, sharePost, deletePost, addComment, addReply, deleteComment, deleteReply } = useBlog()
+  const { getPostById, likePost, sharePost, deletePost, addComment, addReply, deleteComment, deleteReply, reportPost, unreportPost } = useBlog()
   const { user, hasRole } = useAuth()
   const isAdmin = hasRole(['admin'])
 
@@ -16,6 +17,8 @@ const BlogDetailPage = () => {
   const [replyText, setReplyText] = useState<{ [key: string]: string }>({})
   const [showReplyBox, setShowReplyBox] = useState<{ [key: string]: boolean }>({})
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [reportReason, setReportReason] = useState('')
 
   const post = id ? getPostById(id) : undefined
 
@@ -103,6 +106,22 @@ const BlogDetailPage = () => {
     return isAdmin || post.author === user?.username
   }
 
+  const handleReportPost = () => {
+    if (reportReason.trim()) {
+      reportPost(post.id, reportReason)
+      setShowReportModal(false)
+      setReportReason('')
+      alert('Post has been reported for review')
+    }
+  }
+
+  const handleUnreportPost = () => {
+    if (window.confirm('Are you sure you want to remove the report from this post?')) {
+      unreportPost(post.id)
+      alert('Post report has been removed')
+    }
+  }
+
   return (
     <div className="blog-detail-container">
       <button onClick={() => navigate('/blog')} className="btn-back-top">
@@ -166,6 +185,21 @@ const BlogDetailPage = () => {
             🔗 Share ({post.shares})
           </button>
           <span className="action-info">💬 {post.comments.length} Comments</span>
+          {post.reported && (
+            <span className="reported-badge" title={`Reported: ${post.reportReason}`}>
+              🚩 Reported
+            </span>
+          )}
+          {!post.reported && user && post.author !== user.username && (
+            <button onClick={() => setShowReportModal(true)} className="action-button report-btn">
+              <Flag size={16} /> Report Post
+            </button>
+          )}
+          {post.reported && isAdmin && (
+            <button onClick={handleUnreportPost} className="action-button unreport-btn">
+              Remove Report
+            </button>
+          )}
           {canDeletePost() && (
             <button onClick={handleDeletePost} className="action-button delete-post-btn">
               🗑️ Delete Post
@@ -267,6 +301,82 @@ const BlogDetailPage = () => {
 
       {selectedUser && (
         <UserProfileModal username={selectedUser} onClose={() => setSelectedUser(null)} />
+      )}
+
+      {showReportModal && (
+        <div className="modal-overlay" onClick={() => setShowReportModal(false)}>
+          <div className="modal-content report-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Report Post</h3>
+              <button onClick={() => setShowReportModal(false)} className="modal-close-btn">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="modal-description">Please select a reason for reporting this post:</p>
+              <div className="report-reasons">
+                <label className="report-reason-option">
+                  <input
+                    type="radio"
+                    name="reportReason"
+                    value="Spam or misleading content"
+                    checked={reportReason === 'Spam or misleading content'}
+                    onChange={(e) => setReportReason(e.target.value)}
+                  />
+                  <span>Spam or misleading content</span>
+                </label>
+                <label className="report-reason-option">
+                  <input
+                    type="radio"
+                    name="reportReason"
+                    value="Harassment or hate speech"
+                    checked={reportReason === 'Harassment or hate speech'}
+                    onChange={(e) => setReportReason(e.target.value)}
+                  />
+                  <span>Harassment or hate speech</span>
+                </label>
+                <label className="report-reason-option">
+                  <input
+                    type="radio"
+                    name="reportReason"
+                    value="Inappropriate content"
+                    checked={reportReason === 'Inappropriate content'}
+                    onChange={(e) => setReportReason(e.target.value)}
+                  />
+                  <span>Inappropriate content</span>
+                </label>
+                <label className="report-reason-option">
+                  <input
+                    type="radio"
+                    name="reportReason"
+                    value="False information"
+                    checked={reportReason === 'False information'}
+                    onChange={(e) => setReportReason(e.target.value)}
+                  />
+                  <span>False information</span>
+                </label>
+                <label className="report-reason-option">
+                  <input
+                    type="radio"
+                    name="reportReason"
+                    value="Other violation"
+                    checked={reportReason === 'Other violation'}
+                    onChange={(e) => setReportReason(e.target.value)}
+                  />
+                  <span>Other violation</span>
+                </label>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button onClick={() => setShowReportModal(false)} className="btn-cancel">
+                Cancel
+              </button>
+              <button onClick={handleReportPost} className="btn-submit-report" disabled={!reportReason}>
+                Submit Report
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

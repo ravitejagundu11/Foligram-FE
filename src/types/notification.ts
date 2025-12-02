@@ -1,6 +1,6 @@
 export interface Notification {
   id: string
-  type: 'like' | 'comment' | 'reply' | 'share' | 'subscription' | 'mention' | 'appointment'
+  type: 'like' | 'comment' | 'reply' | 'share' | 'subscription' | 'mention' | 'appointment' | 'report'
   recipientUsername: string
   actorUsername: string
   actorName: string

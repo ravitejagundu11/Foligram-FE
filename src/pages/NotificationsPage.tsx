@@ -41,6 +41,8 @@ export default function NotificationsPage() {
         return '📢'
       case 'appointment':
         return '📅'
+      case 'report':
+        return '🚩'
       default:
         return '📬'
     }
@@ -52,6 +54,17 @@ export default function NotificationsPage() {
     // Navigate to relevant page
     if (notification.type === 'appointment') {
       navigate('/appointment-management')
+    } else if (notification.type === 'report') {
+      // Check if user is admin to navigate to moderation page
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        const user = JSON.parse(storedUser)
+        if (user.role === 'admin') {
+          navigate('/admin/moderation')
+        } else if (notification.postId) {
+          navigate(`/blog/${notification.postId}`)
+        }
+      }
     } else if (notification.postId) {
       navigate(`/blog/${notification.postId}`)
     }

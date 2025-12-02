@@ -14,6 +14,8 @@ interface BlogContextType {
   deleteComment: (postId: string, commentId: string) => void
   deleteReply: (postId: string, commentId: string, replyId: string) => void
   getPostById: (postId: string) => BlogPost | undefined
+  reportPost: (postId: string, reason: string) => void
+  unreportPost: (postId: string) => void
 }
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined)
@@ -278,6 +280,72 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return posts.find((post) => post.id === postId)
   }
 
+  const reportPost = (postId: string, reason: string) => {
+    if (!user) return
+
+    const reporterName = `${user.firstName} ${user.lastName}`.trim() || user.username
+
+    setPosts((prevPosts) => {
+      const updated = prevPosts.map((post) => {
+        if (post.id === postId) {
+          // Send notification to post owner
+          if (post.author !== user.username) {
+            addNotification({
+              type: 'report',
+              recipientUsername: post.author,
+              actorUsername: 'anonymous',
+              actorName: 'A user',
+              postId: post.id,
+              postTitle: post.title,
+              message: `has reported your post for: ${reason}`,
+            })
+          }
+
+          // Send notification to all admins
+          const storedUsers = localStorage.getItem('appUsers')
+          if (storedUsers) {
+            try {
+              const allUsers = JSON.parse(storedUsers)
+              const adminUsers = allUsers.filter((u: any) => u.role === 'admin')
+              
+              adminUsers.forEach((admin: any) => {
+                // Don't send to the reporter if they're an admin
+                if (admin.username !== user.username) {
+                  addNotification({
+                    type: 'report',
+                    recipientUsername: admin.username,
+                    actorUsername: user.username,
+                    actorName: reporterName,
+                    postId: post.id,
+                    postTitle: post.title,
+                    message: `reported a post for: ${reason}`,
+                  })
+                }
+              })
+            } catch (err) {
+              console.error('Failed to load users for admin notifications:', err)
+            }
+          }
+
+          return { ...post, reported: true, reportReason: reason }
+        }
+        return post
+      })
+      localStorage.setItem('blog_posts', JSON.stringify(updated))
+      return updated
+    })
+  }
+
+  const unreportPost = (postId: string) => {
+    setPosts((prevPosts) => {
+      const updated = prevPosts.map((post) =>
+        post.id === postId ? { ...post, reported: false, reportReason: undefined } : post
+      )
+      localStorage.setItem('blog_posts', JSON.stringify(updated))
+      return updated
+    })
+  }
+
   return (
     <BlogContext.Provider
       value={{
@@ -291,6 +359,8 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         deleteComment,
         deleteReply,
         getPostById,
+        reportPost,
+        unreportPost,
       }}
     >
       {children}

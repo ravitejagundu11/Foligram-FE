@@ -29,6 +29,11 @@ import NotFound from '@pages/NotFound'
 import AppointmentManagement from './pages/AppointmentManagement'
 import BookingPage from './pages/BookingPage'
 import MyPortfolios from './pages/MyPortfolios'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import AdminReportsPage from './pages/admin/AdminReportsPage'
+import AdminModerationPage from './pages/admin/AdminModerationPage'
+import AdminSettingsPage from './pages/admin/AdminSettingsPage'
+import AdminNotificationsPage from './pages/admin/AdminNotificationsPage'
 
 function App() {
   return (
@@ -147,6 +152,46 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <UserManagementPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="admin"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="admin/reports"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminReportsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="admin/moderation"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminModerationPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="admin/settings"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminSettingsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="admin/notifications"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminNotificationsPage />
                   </ProtectedRoute>
                 }
               />

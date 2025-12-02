@@ -5,7 +5,7 @@ import { useNotification } from '@contexts/NotificationContext'
 import { useState } from 'react'
 import Footer from './Footer'
 import PageSelector from '@components/common/PageSelector'
-import { Home, FileText, Calendar, BarChart3, Settings, LogOut, UserCircle, Users, Book, ChevronLeft, ChevronRight, Bell, User, Layout as LayoutIcon, Shield, Folders, Briefcase } from 'lucide-react'
+import { Home, FileText, Calendar, BarChart3, Settings, LogOut, UserCircle, Users, Book, ChevronLeft, ChevronRight, Bell, User, Layout as LayoutIcon, Shield, Folders, Briefcase, Gauge, FileBarChart, Ban, Cog, BellRing } from 'lucide-react'
 import '../../styles/Layout.css'
 
 const Layout = () => {
@@ -158,15 +158,62 @@ const Layout = () => {
                   {isSidebarCollapsed && <span className="nav-tooltip">Notifications</span>}
                 </button>
                 {isAdmin && (
-                  <button
-                    className={`sidebar-nav-item ${isActive('/admin/user-management') ? 'active' : ''}`}
-                    onClick={() => navigate('/admin/user-management')}
-                    title="User Management"
-                  >
-                    <Shield size={24} />
-                    {!isSidebarCollapsed && <span className="nav-label">User Management</span>}
-                    {isSidebarCollapsed && <span className="nav-tooltip">User Management</span>}
-                  </button>
+                  <>
+                    <button
+                      className={`sidebar-nav-item ${isActive('/admin') ? 'active' : ''}`}
+                      onClick={() => navigate('/admin')}
+                      title="Admin Dashboard"
+                    >
+                      <Gauge size={24} />
+                      {!isSidebarCollapsed && <span className="nav-label">Admin Dashboard</span>}
+                      {isSidebarCollapsed && <span className="nav-tooltip">Admin Dashboard</span>}
+                    </button>
+                    <button
+                      className={`sidebar-nav-item ${isActive('/admin/user-management') ? 'active' : ''}`}
+                      onClick={() => navigate('/admin/user-management')}
+                      title="User Management"
+                    >
+                      <Shield size={24} />
+                      {!isSidebarCollapsed && <span className="nav-label">User Management</span>}
+                      {isSidebarCollapsed && <span className="nav-tooltip">User Management</span>}
+                    </button>
+                    <button
+                      className={`sidebar-nav-item ${isActive('/admin/reports') ? 'active' : ''}`}
+                      onClick={() => navigate('/admin/reports')}
+                      title="Reports"
+                    >
+                      <FileBarChart size={24} />
+                      {!isSidebarCollapsed && <span className="nav-label">Reports</span>}
+                      {isSidebarCollapsed && <span className="nav-tooltip">Reports</span>}
+                    </button>
+                    <button
+                      className={`sidebar-nav-item ${isActive('/admin/moderation') ? 'active' : ''}`}
+                      onClick={() => navigate('/admin/moderation')}
+                      title="Moderation"
+                    >
+                      <Ban size={24} />
+                      {!isSidebarCollapsed && <span className="nav-label">Moderation</span>}
+                      {isSidebarCollapsed && <span className="nav-tooltip">Moderation</span>}
+                    </button>
+                    <button
+                      className={`sidebar-nav-item ${isActive('/admin/notifications') ? 'active' : ''}`}
+                      onClick={() => navigate('/admin/notifications')}
+                      title="Admin Notifications"
+                    >
+                      <BellRing size={24} />
+                      {!isSidebarCollapsed && <span className="nav-label">Admin Notifications</span>}
+                      {isSidebarCollapsed && <span className="nav-tooltip">Admin Notifications</span>}
+                    </button>
+                    <button
+                      className={`sidebar-nav-item ${isActive('/admin/settings') ? 'active' : ''}`}
+                      onClick={() => navigate('/admin/settings')}
+                      title="Admin Settings"
+                    >
+                      <Cog size={24} />
+                      {!isSidebarCollapsed && <span className="nav-label">Admin Settings</span>}
+                      {isSidebarCollapsed && <span className="nav-tooltip">Admin Settings</span>}
+                    </button>
+                  </>
                 )}
               </>
             ) : (
