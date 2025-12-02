@@ -63,6 +63,67 @@
   flex-shrink: 0;
   flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
+}
+
+/* Template Selector */
+.template-selector-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+  transition: all 0.3s ease;
+}
+
+.template-selector-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+}
+
+.template-selector-icon {
+  color: white;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.template-select-dropdown {
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1f2937;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 16px;
+}
+
+.template-select-dropdown:hover {
+  background: white;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.template-select-dropdown:focus {
+  outline: none;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+.template-select-dropdown option {
+  padding: 0.5rem;
+  background: white;
+  color: #1f2937;
+  font-weight: 500;
 }
 
 .config-button {
@@ -843,12 +904,22 @@
 
   .config-header-actions {
     width: 100%;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: flex-start;
+    gap: 0.75rem;
+  }
+
+  .template-selector-wrapper {
+    width: 100%;
+  }
+
+  .template-select-dropdown {
+    width: 100%;
+    min-width: auto;
   }
 
   .config-button {
-    flex: 1;
+    width: 100%;
     justify-content: center;
     padding: 0.75rem 1rem;
     font-size: 0.875rem;

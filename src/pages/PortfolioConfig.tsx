@@ -8,6 +8,16 @@ import type { PortfolioConfig, Template, Project, Skill, Testimonial, Portfolio 
 import ProjectForm from '@components/ProjectForm'
 import SkillsList from '@components/SkillsList'
 import TestimonialsList from '@components/TestimonialsList'
+import ClassicProfessionalTemplate from '../components/templates/ClassicProfessionalTemplate'
+import ModernDarkTemplate from '../components/templates/ModernDarkTemplate'
+import ProjectCentricTemplate from '../components/templates/ProjectCentricTemplate'
+import MinimalistAcademicTemplate from '../components/templates/MinimalistAcademicTemplate'
+import ModernAcademicTemplate from '../components/templates/ModernAcademicTemplate'
+import PhotographyTemplate from '../components/templates/PhotographyTemplate'
+import ArchitectTemplate from '../components/templates/ArchitectTemplate'
+import FashionDesignerTemplate from '../components/templates/FashionDesignerTemplate'
+import InteriorDesignerTemplate from '../components/templates/InteriorDesignerTemplate'
+import TeacherTemplate from '../components/templates/TeacherTemplate'
 import {
   Save,
   Eye,
@@ -16,6 +26,7 @@ import {
   Palette,
   Type,
   Layout,
+  LayoutTemplate,
   Link as LinkIcon,
   Briefcase,
   Award,
@@ -39,6 +50,7 @@ const PortfolioConfigComponent = () => {
   const navigate = useNavigate()
   
   const [template, setTemplate] = useState<Template | null>(null)
+  const [availableTemplates, setAvailableTemplates] = useState<Template[]>([])
   const [config, setConfig] = useState<PortfolioConfig>({
     templateId: templateId || '',
     name: '',
@@ -129,6 +141,8 @@ const PortfolioConfigComponent = () => {
     if (templateId) {
       fetchTemplate(templateId)
     }
+    // Fetch all available templates for the selector
+    fetchAllTemplates()
 
     // Check if we're in edit mode and load existing portfolio
     const state = location.state as { portfolioId?: string; editMode?: boolean } | null
@@ -171,6 +185,28 @@ const PortfolioConfigComponent = () => {
     root.style.setProperty('--heading-font', config.typography.headingFont)
     root.style.setProperty('--body-font', config.typography.bodyFont)
   }, [config])
+
+  const fetchAllTemplates = async () => {
+    try {
+      const data = await apiClient.get<Template[]>('/templates')
+      setAvailableTemplates(data)
+    } catch (error) {
+      console.error('Error fetching templates:', error)
+      // Fallback to predefined templates
+      setAvailableTemplates([
+        { id: '1', name: 'Classic Professional', category: 'Engineers/Diploma', description: 'Ideal for fresh graduates, clean layout', thumbnail: '/templates/1.jpg', isPremium: false, tags: ['Professional', 'Clean', 'Modern'], layoutType: 'grid' },
+        { id: '2', name: 'Modern UNO', category: 'Engineers/Diploma', description: 'Best for portfolio - sleek with dark theme', thumbnail: '/templates/2.jpg', isPremium: false, tags: ['Dark', 'Sleek', 'Portfolio'], layoutType: 'masonry' },
+        { id: '3', name: 'Project-Centric', category: 'Engineers/Diploma', description: 'Highlight your best projects first', thumbnail: '/templates/3.jpg', isPremium: false, tags: ['Projects', 'Showcase', 'Visual'], layoutType: 'grid' },
+        { id: '4', name: 'Minimalist Academic', category: 'Engineers/Diploma', description: 'Perfect for research, academic style', thumbnail: '/templates/4.jpg', isPremium: true, tags: ['Academic', 'Minimal', 'Clean'], layoutType: 'list' },
+        { id: '5', name: 'Modern Academic', category: 'Engineers/Diploma', description: 'Best for projects, research papers', thumbnail: '/templates/5.jpg', isPremium: false, tags: ['Research', 'Academic', 'Professional'], layoutType: 'grid' },
+        { id: '6', name: 'Photography', category: 'Creatives', description: 'Capture moments, framing creativity', thumbnail: '/templates/6.png', isPremium: false, tags: ['Visual', 'Gallery', 'Creative'], layoutType: 'masonry' },
+        { id: '7', name: 'Architect', category: 'Creatives', description: 'Designs create the visual space', thumbnail: '/templates/7.png', isPremium: false, tags: ['Design', 'Visual', 'Architecture'], layoutType: 'grid' },
+        { id: '8', name: 'Fashion Designer', category: 'Creatives', description: 'Style embraces artistry today', thumbnail: '/templates/8.jpg', isPremium: false, tags: ['Fashion', 'Style', 'Creative'], layoutType: 'masonry' },
+        { id: '9', name: 'Interior Designer', category: 'Creatives', description: 'Transforming rooms into life', thumbnail: '/templates/9.jpg', isPremium: false, tags: ['Interior', 'Design', 'Space'], layoutType: 'grid' },
+        { id: '10', name: 'Teacher', category: 'Creatives', description: 'Inspiring ideas, shaping tomorrow', thumbnail: '/templates/10.jpg', isPremium: false, tags: ['Education', 'Teaching', 'Impact'], layoutType: 'list' }
+      ])
+    }
+  }
 
   const fetchTemplate = async (id: string) => {
     try {
@@ -260,6 +296,77 @@ const PortfolioConfigComponent = () => {
     }
   }
 
+  // Render the appropriate template for preview
+  const renderPreviewTemplate = () => {
+    // Create a portfolio object for preview
+    const previewPortfolio: Portfolio = {
+      id: portfolioId || 'preview',
+      userId: 'preview-user',
+      templateId: config.templateId,
+      name: config.name || 'Your Name',
+      headline: config.headline,
+      description: config.description,
+      profilePicture: config.profilePicture,
+      contactEmail: sectionContent.contact?.[0]?.email || '',
+      slug: 'preview',
+      isPublished: false,
+      views: 0,
+      likes: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      theme: config.theme,
+      typography: config.typography,
+      layout: config.layout,
+      sections: config.sections,
+      socialLinks: config.socialLinks,
+      projects: projects,
+      skills: skills,
+      testimonials: testimonials,
+      sectionOrder: sectionOrder,
+      sectionNames: sectionNames,
+      sectionContent: sectionContent
+    }
+
+    const templateProps = {
+      portfolio: previewPortfolio,
+      projects: projects,
+      skills: skills,
+      testimonials: testimonials,
+      onProjectClick: () => {}, // No-op for preview
+      onScheduleAppointment: undefined, // Disabled in preview
+      onSubscribe: undefined, // Disabled in preview
+      isSubscribed: false,
+      subscribing: false,
+      currentUser: undefined
+    }
+
+    // Route to different templates based on templateId
+    switch (config.templateId) {
+      case '1': // Classic Professional
+        return <ClassicProfessionalTemplate {...templateProps} />
+      case '2': // Modern Dark (Modern UNO)
+        return <ModernDarkTemplate {...templateProps} />
+      case '3': // Project-Centric
+        return <ProjectCentricTemplate {...templateProps} />
+      case '4': // Minimalist Academic
+        return <MinimalistAcademicTemplate {...templateProps} />
+      case '5': // Modern Academic
+        return <ModernAcademicTemplate {...templateProps} />
+      case '6': // Photography
+        return <PhotographyTemplate {...templateProps} />
+      case '7': // Architect
+        return <ArchitectTemplate {...templateProps} />
+      case '8': // Fashion Designer
+        return <FashionDesignerTemplate {...templateProps} />
+      case '9': // Interior Designer
+        return <InteriorDesignerTemplate {...templateProps} />
+      case '10': // Teacher
+        return <TeacherTemplate {...templateProps} />
+      default:
+        return <ClassicProfessionalTemplate {...templateProps} />
+    }
+  }
+
   const handleSave = async () => {
     setSaving(true)
     try {
@@ -309,6 +416,7 @@ const PortfolioConfigComponent = () => {
         id: savedPortfolioId,
         slug: slug, // Save slug for URL access
         profilePicture: profilePictureUrl,
+        contactEmail: sectionContent.contact?.[0]?.email || existingPortfolio?.contactEmail || '', // Extract email from contact section
         sectionOrder,
         sectionNames,
         sectionContent, // Include all section content (education, experience, publications, contact)
@@ -427,6 +535,13 @@ const PortfolioConfigComponent = () => {
     }
   }
 
+  const handleTemplateChange = async (newTemplateId: string) => {
+    // Update config with new template ID
+    setConfig(prev => ({ ...prev, templateId: newTemplateId }))
+    // Fetch the new template details
+    await fetchTemplate(newTemplateId)
+  }
+
   const moveSectionUp = (index: number) => {
     if (index === 0) return
     const newOrder = [...sectionOrder]
@@ -537,6 +652,23 @@ const PortfolioConfigComponent = () => {
           )}
         </div>
         <div className="config-header-actions">
+          {showPreview && availableTemplates.length > 0 && (
+            <div className="template-selector-wrapper">
+              <LayoutTemplate size={18} className="template-selector-icon" />
+              <select
+                id="template-select"
+                value={config.templateId}
+                onChange={(e) => handleTemplateChange(e.target.value)}
+                className="template-select-dropdown"
+              >
+                {availableTemplates.map((tmpl) => (
+                  <option key={tmpl.id} value={tmpl.id}>
+                    {tmpl.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <button
             className="config-button preview"
             onClick={() => setShowPreview(!showPreview)}
@@ -2145,322 +2277,21 @@ const PortfolioConfigComponent = () => {
         </div>
         )}
 
-        {/* Full Page Preview */}
+        {/* Full Page Preview - Actual Template Rendering */}
         {showPreview && (
           <motion.div
             className="preview-panel preview-panel-fullpage"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            style={{ 
+              width: '100%',
+              height: '100vh',
+              overflow: 'auto',
+              position: 'relative'
+            }}
           >
-            <div className="preview-content preview-content-fullpage">
-              <div className="preview-mockup preview-mockup-fullpage" style={{
-                backgroundColor: config.theme.backgroundColor,
-                color: config.theme.textColor,
-                fontFamily: config.typography.bodyFont,
-                fontSize: config.typography.fontSize === 'small' ? '14px' : config.typography.fontSize === 'large' ? '18px' : '16px'
-              }}>
-                {/* Header Preview */}
-                <div className={`preview-header-section ${config.layout.headerStyle}`}>
-                  {config.profilePicture && (
-                    <img
-                      src={config.profilePicture}
-                      alt="Profile"
-                      className="preview-avatar"
-                    />
-                  )}
-                  <h1 style={{
-                    fontFamily: config.typography.headingFont,
-                    color: config.theme.primaryColor
-                  }}>
-                    {config.headline || 'Your Headline'}
-                  </h1>
-                  <p style={{ fontFamily: config.typography.bodyFont }}>{config.description || 'Your description will appear here...'}</p>
-                  
-                  {/* Social Links Preview */}
-                  {(config.socialLinks.github || config.socialLinks.linkedin || config.socialLinks.twitter || config.socialLinks.website) && (
-                    <div className="preview-social-links">
-                      {config.socialLinks.github && (
-                        <a href={config.socialLinks.github} target="_blank" rel="noopener noreferrer" className="social-link" title="GitHub">
-                          <Github size={20} />
-                        </a>
-                      )}
-                      {config.socialLinks.linkedin && (
-                        <a href={config.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="social-link" title="LinkedIn">
-                          <Linkedin size={20} />
-                        </a>
-                      )}
-                      {config.socialLinks.twitter && (
-                        <a href={config.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="social-link" title="Twitter">
-                          <Twitter size={20} />
-                        </a>
-                      )}
-                      {config.socialLinks.website && (
-                        <a href={config.socialLinks.website} target="_blank" rel="noopener noreferrer" className="social-link" title="Website">
-                          <LinkIcon size={20} />
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Content Sections - Display in order */}
-                <div className={`preview-sections spacing-${config.layout.spacing}`}>
-                  {sectionOrder.filter(key => config.sections[key as keyof typeof config.sections] !== false).map((key) => (
-                    <div
-                      key={key}
-                      className={`preview-section card-${config.layout.cardStyle}`}
-                      style={{
-                        borderColor: config.theme.secondaryColor
-                      }}
-                    >
-                      <h3 style={{ 
-                        color: config.theme.primaryColor,
-                        fontFamily: config.typography.headingFont
-                      }}>
-                        {sectionNames[key] || key.charAt(0).toUpperCase() + key.slice(1)}
-                      </h3>
-                      
-                      {/* Show relevant content for each section type */}
-                      {key === 'projects' && projects.length > 0 && (
-                        <div className="preview-projects">
-                          {projects.slice(0, 2).map(project => (
-                            <div key={project.id} className="preview-project-card">
-                              {project.featured && (
-                                <span className="preview-featured-badge" style={{ 
-                                  backgroundColor: config.theme.accentColor,
-                                  fontFamily: config.typography.bodyFont 
-                                }}>⭐ Featured</span>
-                              )}
-                              <h4 style={{ fontFamily: config.typography.headingFont }}>{project.title}</h4>
-                              <p style={{ fontFamily: config.typography.bodyFont }}>{project.description.substring(0, 80)}...</p>
-                              
-                              {project.techStack.length > 0 && (
-                                <div className="preview-tech-stack">
-                                  {project.techStack.slice(0, 4).map(tech => (
-                                    <span key={tech} className="preview-tech-badge" style={{ 
-                                      backgroundColor: config.theme.accentColor,
-                                      fontFamily: config.typography.bodyFont
-                                    }}>
-                                      {tech}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                              
-                              {(project.demoUrl || project.codeUrl) && (
-                                <div className="preview-project-links" style={{ fontFamily: config.typography.bodyFont }}>
-                                  {project.demoUrl && (
-                                    <span className="preview-link" style={{ color: config.theme.primaryColor }}>🔗 Demo</span>
-                                  )}
-                                  {project.codeUrl && (
-                                    <span className="preview-link" style={{ color: config.theme.primaryColor }}>💻 Code</span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {key === 'skills' && skills.length > 0 && (
-                        <div className="preview-skills">
-                          {skills.slice(0, 6).map(skill => (
-                            <div key={skill.id} className="preview-skill-item" style={{ 
-                              fontFamily: config.typography.bodyFont,
-                              borderColor: config.theme.secondaryColor
-                            }}>
-                              <div className="preview-skill-header">
-                                <span className="preview-skill-name" style={{ color: config.theme.primaryColor }}>{skill.name}</span>
-                                <span className="preview-skill-category" style={{ 
-                                  backgroundColor: config.theme.accentColor,
-                                  color: '#ffffff'
-                                }}>
-                                  {skill.category}
-                                </span>
-                              </div>
-                              <div className="preview-skill-proficiency">
-                                {[1, 2, 3, 4, 5].map((level) => (
-                                  <div
-                                    key={level}
-                                    className={`preview-skill-star ${level <= skill.proficiency ? 'filled' : ''}`}
-                                    style={{ 
-                                      backgroundColor: level <= skill.proficiency ? config.theme.accentColor : '#e5e7eb'
-                                    }}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {key === 'testimonials' && testimonials.length > 0 && (
-                        <div className="preview-testimonials-list">
-                          {testimonials.slice(0, 2).map(testimonial => (
-                            <div key={testimonial.id} className="preview-testimonial-item">
-                              <p style={{ fontFamily: config.typography.bodyFont, fontStyle: 'italic' }}>"{testimonial.content}"</p>
-                              <div style={{ marginTop: '0.5rem' }}>
-                                <strong style={{ fontFamily: config.typography.bodyFont, color: config.theme.primaryColor }}>{testimonial.name}</strong>
-                                <small style={{ fontFamily: config.typography.bodyFont, display: 'block', opacity: 0.8 }}>
-                                  {testimonial.role}{testimonial.company ? ` at ${testimonial.company}` : ''}
-                                </small>
-                                {testimonial.rating && (
-                                  <div style={{ marginTop: '0.25rem', color: config.theme.accentColor }}>{'★'.repeat(testimonial.rating)}</div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {/* Education Section Preview */}
-                      {key === 'education' && sectionContent.education && sectionContent.education.length > 0 && (
-                        <div className="preview-generic-items">
-                          {sectionContent.education.slice(0, 3).map((item: any) => (
-                            <div key={item.id} className="preview-generic-item">
-                              <h4 style={{ fontFamily: config.typography.headingFont, color: config.theme.primaryColor, marginBottom: '0.25rem' }}>
-                                {item.schoolName}
-                              </h4>
-                              <div style={{ fontFamily: config.typography.bodyFont, fontWeight: 600, marginBottom: '0.25rem' }}>
-                                {item.level} {item.course && `in ${item.course}`}
-                              </div>
-                              {(item.startDate || item.endDate) && (
-                                <small style={{ fontFamily: config.typography.bodyFont, opacity: 0.7, display: 'block' }}>
-                                  {item.startDate && new Date(item.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-                                  {item.startDate && item.endDate && ' - '}
-                                  {item.endDate && new Date(item.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-                                </small>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {/* Experience Section Preview */}
-                      {key === 'experience' && sectionContent.experience && sectionContent.experience.length > 0 && (
-                        <div className="preview-generic-items">
-                          {sectionContent.experience.slice(0, 3).map((item: any) => (
-                            <div key={item.id} className="preview-generic-item">
-                              <h4 style={{ fontFamily: config.typography.headingFont, color: config.theme.primaryColor, marginBottom: '0.25rem' }}>
-                                {item.role}
-                              </h4>
-                              <div style={{ fontFamily: config.typography.bodyFont, fontWeight: 600, marginBottom: '0.25rem' }}>
-                                {item.company} {item.type && `• ${item.type}`}
-                              </div>
-                              {(item.startDate || item.endDate) && (
-                                <small style={{ fontFamily: config.typography.bodyFont, opacity: 0.7, display: 'block', marginBottom: '0.5rem' }}>
-                                  {item.startDate && new Date(item.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-                                  {item.startDate && item.endDate && ' - '}
-                                  {item.endDate && new Date(item.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-                                </small>
-                              )}
-                              {item.achievements && item.achievements.length > 0 && (
-                                <ul style={{ margin: '0.5rem 0 0 1.25rem', padding: 0, fontFamily: config.typography.bodyFont, fontSize: '0.85rem' }}>
-                                  {item.achievements.filter((a: string) => a.trim()).slice(0, 3).map((achievement: string, idx: number) => (
-                                    <li key={idx} style={{ marginBottom: '0.25rem' }}>{achievement}</li>
-                                  ))}
-                                </ul>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {/* Publications Section Preview */}
-                      {key === 'publications' && sectionContent.publications && sectionContent.publications.length > 0 && (
-                        <div className="preview-generic-items">
-                          {sectionContent.publications.slice(0, 3).map((item: any) => (
-                            <div key={item.id} className="preview-generic-item">
-                              <h4 style={{ fontFamily: config.typography.headingFont, color: config.theme.primaryColor, marginBottom: '0.25rem' }}>
-                                {item.title}
-                              </h4>
-                              {item.organization && (
-                                <div style={{ fontFamily: config.typography.bodyFont, fontWeight: 600, marginBottom: '0.25rem' }}>
-                                  {item.organization}
-                                </div>
-                              )}
-                              {item.date && (
-                                <small style={{ fontFamily: config.typography.bodyFont, opacity: 0.7, display: 'block', marginBottom: '0.5rem' }}>
-                                  {new Date(item.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
-                                </small>
-                              )}
-                              {item.description && (
-                                <p style={{ fontFamily: config.typography.bodyFont, fontSize: '0.85rem', lineHeight: '1.6', margin: 0 }}>
-                                  {item.description}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {/* Contact Section Preview */}
-                      {key === 'contact' && sectionContent.contact && sectionContent.contact.length > 0 && (
-                        <div className="preview-generic-items">
-                          {sectionContent.contact.slice(0, 1).map((item: any) => (
-                            <div key={item.id} className="preview-contact-item" style={{ fontFamily: config.typography.bodyFont }}>
-                              {item.name && (
-                                <div style={{ marginBottom: '0.5rem' }}>
-                                  <strong style={{ color: config.theme.primaryColor }}>Name: </strong>{item.name}
-                                </div>
-                              )}
-                              {item.phone && (
-                                <div style={{ marginBottom: '0.5rem' }}>
-                                  <strong style={{ color: config.theme.primaryColor }}>Phone: </strong>{item.phone}
-                                </div>
-                              )}
-                              {item.email && (
-                                <div style={{ marginBottom: '0.5rem' }}>
-                                  <strong style={{ color: config.theme.primaryColor }}>Email: </strong>{item.email}
-                                </div>
-                              )}
-                              {item.address && (
-                                <div>
-                                  <strong style={{ color: config.theme.primaryColor }}>Address: </strong>{item.address}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {/* Custom Dynamic Sections Preview */}
-                      {!STATIC_SECTIONS.includes(key) && sectionContent[key] && sectionContent[key].length > 0 && (
-                        <div className="preview-generic-items">
-                          {sectionContent[key].slice(0, 3).map((item: any) => (
-                            <div key={item.id} className="preview-generic-item">
-                              {item.title && (
-                                <h4 style={{ fontFamily: config.typography.headingFont, color: config.theme.primaryColor, marginBottom: '0.5rem' }}>
-                                  {item.title}
-                                </h4>
-                              )}
-                              {item.description && (
-                                <p style={{ fontFamily: config.typography.bodyFont, fontSize: '0.9rem', lineHeight: '1.6', margin: 0 }}>
-                                  {item.description}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {/* Empty state for sections with no content */}
-                      {!(key === 'projects' && projects.length > 0) && 
-                       !(key === 'skills' && skills.length > 0) && 
-                       !(key === 'testimonials' && testimonials.length > 0) &&
-                       !(key === 'education' && sectionContent.education && sectionContent.education.length > 0) &&
-                       !(key === 'experience' && sectionContent.experience && sectionContent.experience.length > 0) &&
-                       !(key === 'publications' && sectionContent.publications && sectionContent.publications.length > 0) &&
-                       !(key === 'contact' && sectionContent.contact && sectionContent.contact.length > 0) &&
-                       !(!STATIC_SECTIONS.includes(key) && sectionContent[key] && sectionContent[key].length > 0) && (
-                        <p style={{ fontFamily: config.typography.bodyFont, opacity: 0.6, fontStyle: 'italic' }}>No content added yet. Add items to see them here.</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            {renderPreviewTemplate()}
           </motion.div>
         )}
       </div>
