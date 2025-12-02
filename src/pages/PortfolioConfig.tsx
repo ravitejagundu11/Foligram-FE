@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useDropzone } from 'react-dropzone'
 import { SketchPicker } from 'react-color'
 import { apiClient, projectApi, skillApi, testimonialApi } from '@services/api'
-import type { PortfolioConfig, Template, Project, Skill, Testimonial } from '../types/portfolio'
+import type { PortfolioConfig, Template, Project, Skill, Testimonial, Portfolio } from '../types/portfolio'
 import ProjectForm from '@components/ProjectForm'
 import SkillsList from '@components/SkillsList'
 import TestimonialsList from '@components/TestimonialsList'
@@ -35,6 +35,8 @@ import '../styles/PortfolioConfig.css'
 
 const PortfolioConfigComponent = () => {
   const { templateId } = useParams<{ templateId: string }>()
+  const location = useLocation()
+  const navigate = useNavigate()
   
   const [template, setTemplate] = useState<Template | null>(null)
   const [config, setConfig] = useState<PortfolioConfig>({
@@ -127,7 +129,13 @@ const PortfolioConfigComponent = () => {
     if (templateId) {
       fetchTemplate(templateId)
     }
-  }, [templateId])
+
+    // Check if we're in edit mode and load existing portfolio
+    const state = location.state as { portfolioId?: string; editMode?: boolean } | null
+    if (state?.editMode && state?.portfolioId) {
+      loadExistingPortfolio(state.portfolioId)
+    }
+  }, [templateId, location.state])
 
   // Load projects, skills, and testimonials when portfolioId is set
   useEffect(() => {
@@ -173,6 +181,85 @@ const PortfolioConfigComponent = () => {
     }
   }
 
+  const loadExistingPortfolio = async (id: string) => {
+    try {
+      // Try API first
+      try {
+        const response: any = await apiClient.get(`/portfolios/${id}`)
+        const portfolio = response.data as Portfolio
+        
+        // Populate config with existing data
+        setConfig({
+          id: portfolio.id,
+          templateId: portfolio.templateId,
+          name: portfolio.name,
+          headline: portfolio.headline,
+          description: portfolio.description,
+          profilePicture: portfolio.profilePicture,
+          theme: portfolio.theme,
+          typography: portfolio.typography,
+          layout: portfolio.layout,
+          sections: portfolio.sections,
+          socialLinks: portfolio.socialLinks
+        })
+        
+        setPortfolioId(portfolio.id)
+        
+        // Load embedded content if available
+        if (portfolio.projects) setProjects(portfolio.projects)
+        if (portfolio.skills) setSkills(portfolio.skills)
+        if (portfolio.testimonials) setTestimonials(portfolio.testimonials)
+        if (portfolio.sectionOrder) setSectionOrder(portfolio.sectionOrder)
+        if (portfolio.sectionNames) setSectionNames(portfolio.sectionNames)
+        if (portfolio.sectionContent) setSectionContent(portfolio.sectionContent)
+        if (portfolio.profilePicture) setProfilePreview(portfolio.profilePicture)
+        
+        console.log('Loaded portfolio from API:', portfolio)
+      } catch (apiErr) {
+        console.warn('API load failed, trying localStorage:', apiErr)
+        
+        // Fallback to localStorage
+        const storedData = localStorage.getItem(`portfolio_${id}`)
+        if (storedData) {
+          const portfolio = JSON.parse(storedData) as Portfolio
+          
+          setConfig({
+            id: portfolio.id,
+            templateId: portfolio.templateId,
+            name: portfolio.name,
+            headline: portfolio.headline,
+            description: portfolio.description,
+            profilePicture: portfolio.profilePicture,
+            theme: portfolio.theme,
+            typography: portfolio.typography,
+            layout: portfolio.layout,
+            sections: portfolio.sections,
+            socialLinks: portfolio.socialLinks
+          })
+          
+          setPortfolioId(portfolio.id)
+          
+          if (portfolio.projects) setProjects(portfolio.projects)
+          if (portfolio.skills) setSkills(portfolio.skills)
+          if (portfolio.testimonials) setTestimonials(portfolio.testimonials)
+          if (portfolio.sectionOrder) setSectionOrder(portfolio.sectionOrder)
+          if (portfolio.sectionNames) setSectionNames(portfolio.sectionNames)
+          if (portfolio.sectionContent) setSectionContent(portfolio.sectionContent)
+          if (portfolio.profilePicture) setProfilePreview(portfolio.profilePicture)
+          
+          console.log('Loaded portfolio from localStorage:', portfolio)
+        } else {
+          alert('Portfolio not found')
+          navigate('/my-portfolios')
+        }
+      }
+    } catch (err) {
+      console.error('Error loading portfolio:', err)
+      alert('Failed to load portfolio')
+      navigate('/my-portfolios')
+    }
+  }
+
   const handleSave = async () => {
     setSaving(true)
     try {
@@ -196,6 +283,26 @@ const PortfolioConfigComponent = () => {
         ? config.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
         : savedPortfolioId
 
+      // Get existing portfolio data to preserve certain fields
+      let existingPortfolio: any = null
+      if (config.id) {
+        const portfoliosObj = localStorage.getItem('portfolios')
+        if (portfoliosObj) {
+          try {
+            const parsedPortfolios = JSON.parse(portfoliosObj)
+            existingPortfolio = parsedPortfolios[config.id]
+          } catch (err) {
+            console.warn('Failed to load existing portfolio:', err)
+          }
+        }
+        if (!existingPortfolio) {
+          const storedData = localStorage.getItem(`portfolio_${config.id}`)
+          if (storedData) {
+            existingPortfolio = JSON.parse(storedData)
+          }
+        }
+      }
+
       // Prepare complete portfolio data with all content
       const portfolioData = {
         ...config,
@@ -208,9 +315,14 @@ const PortfolioConfigComponent = () => {
         projects, // Include all projects
         skills, // Include all skills
         testimonials, // Include all testimonials
-        isPublished: true, // Mark as published
-        publishedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        // Preserve existing publish status and dates when editing
+        isPublished: existingPortfolio?.isPublished ?? true,
+        publishedAt: existingPortfolio?.publishedAt || new Date().toISOString(),
+        createdAt: existingPortfolio?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        views: existingPortfolio?.views || 0,
+        likes: existingPortfolio?.likes || 0,
+        userId: existingPortfolio?.userId || localStorage.getItem('userId') || localStorage.getItem('currentUserId') || ''
       }
 
       try {
@@ -267,9 +379,19 @@ const PortfolioConfigComponent = () => {
         console.warn('Backend API not available, saving locally:', apiError.message)
         
         // Fallback: Save to localStorage if backend is not available
+        // Save in 'portfolios' object format (for Analytics page)
         const localPortfolios = JSON.parse(localStorage.getItem('portfolios') || '{}')
-        localPortfolios[savedPortfolioId] = portfolioData
+        
+        // Portfolio data already includes all necessary fields
+        const portfolioDataWithUser = portfolioData
+        
+        localPortfolios[savedPortfolioId] = portfolioDataWithUser
         localStorage.setItem('portfolios', JSON.stringify(localPortfolios))
+        
+        // Also save as individual key (for My Portfolios page compatibility)
+        localStorage.setItem(`portfolio_${savedPortfolioId}`, JSON.stringify(portfolioDataWithUser))
+        
+        console.log('Portfolio saved to localStorage with userId:', portfolioDataWithUser.userId)
         
         // Update state
         if (!config.id) {
@@ -281,7 +403,15 @@ const PortfolioConfigComponent = () => {
       // Generate unique published URL using the slug
       const publishedUrl = `${window.location.origin}/portfolio/${slug}`
       
-      alert(`✅ Portfolio saved and published successfully!\n\nYour portfolio is now live at:\n${publishedUrl}\n\nShare this URL with anyone to showcase your work!`)
+      const isUpdating = config.id !== undefined && config.id !== savedPortfolioId
+      const message = isUpdating 
+        ? `✅ Portfolio updated successfully!\n\nYour changes have been saved.${portfolioData.isPublished ? `\n\nView at: ${publishedUrl}` : ''}`
+        : `✅ Portfolio saved and published successfully!\n\nYour portfolio is now live at:\n${publishedUrl}\n\nShare this URL with anyone to showcase your work!`
+      
+      alert(message)
+      
+      // Redirect to My Portfolios page
+      navigate('/my-portfolios')
       
     } catch (error: any) {
       console.error('Error saving portfolio:', error)
@@ -291,6 +421,12 @@ const PortfolioConfigComponent = () => {
     }
   }
   
+  const handleCancel = () => {
+    if (window.confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
+      navigate('/my-portfolios')
+    }
+  }
+
   const moveSectionUp = (index: number) => {
     if (index === 0) return
     const newOrder = [...sectionOrder]
@@ -409,14 +545,24 @@ const PortfolioConfigComponent = () => {
             {showPreview ? 'Back to Configuration' : 'Show Preview'}
           </button>
           {!showPreview && (
-            <button
-              className="config-button save"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              <Save size={18} />
-              {saving ? 'Saving...' : 'Save Portfolio'}
-            </button>
+            <>
+              <button
+                className="config-button cancel"
+                onClick={handleCancel}
+                disabled={saving}
+              >
+                <X size={18} />
+                Cancel
+              </button>
+              <button
+                className="config-button save"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                <Save size={18} />
+                {saving ? 'Saving...' : 'Save Portfolio'}
+              </button>
+            </>
           )}
         </div>
       </div>

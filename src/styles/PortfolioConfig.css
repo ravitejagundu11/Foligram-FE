@@ -101,6 +101,18 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+.config-button.cancel {
+  background: white;
+  color: #6b7280;
+  border: 2px solid #d1d5db;
+}
+
+.config-button.cancel:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  transform: translateY(-2px);
+}
+
 .config-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
