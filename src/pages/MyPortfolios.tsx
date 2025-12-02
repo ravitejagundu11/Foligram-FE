@@ -1,0 +1,524 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { useAuth } from '@contexts/AuthContext'
+import { apiClient } from '@services/api'
+import type { Portfolio } from '../types/portfolio'
+import {
+  Eye,
+  Edit,
+  Trash2,
+  Globe,
+  Lock,
+  Link as LinkIcon,
+  Calendar,
+  TrendingUp,
+  Heart,
+  Plus,
+  AlertCircle,
+  Check,
+  X
+} from 'lucide-react'
+import '../styles/MyPortfolios.css'
+
+const MyPortfolios = () => {
+  const navigate = useNavigate()
+  const { user, isAuthenticated } = useAuth()
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [editingSlug, setEditingSlug] = useState<string | null>(null)
+  const [newSlug, setNewSlug] = useState('')
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+    loadPortfolios()
+  }, [isAuthenticated, navigate])
+
+  const loadPortfolios = async () => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      // Try API first
+      const response: any = await apiClient.get('/portfolios/my-portfolios')
+      setPortfolios(response.data)
+    } catch (err) {
+      console.error('Error loading portfolios from API:', err)
+      
+      // Fallback to localStorage
+      try {
+        const userId = localStorage.getItem('userId') || ''
+        const userEmail = user?.email || localStorage.getItem('userEmail') || ''
+        const currentUserId = localStorage.getItem('currentUserId') || userId
+        
+        const allPortfolios: Portfolio[] = []
+        
+        // Method 1: Check the 'portfolios' object (used by PortfolioConfig save)
+        const portfoliosObj = localStorage.getItem('portfolios')
+        if (portfoliosObj) {
+          try {
+            const parsedPortfolios = JSON.parse(portfoliosObj)
+            const portfoliosList = Object.values(parsedPortfolios) as Portfolio[]
+            
+            // Add all portfolios from the object (they should all belong to current user)
+            allPortfolios.push(...portfoliosList)
+            console.log('Loaded portfolios from "portfolios" object:', portfoliosList.length)
+          } catch (parseErr) {
+            console.warn('Failed to parse portfolios object:', parseErr)
+          }
+        }
+        
+        // Method 2: Check individual portfolio_${id} keys
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && key.startsWith('portfolio_')) {
+            try {
+              const portfolioData = localStorage.getItem(key)
+              if (portfolioData) {
+                const portfolio = JSON.parse(portfolioData) as Portfolio
+                
+                // Check if portfolio belongs to current user
+                if (portfolio.userId === userId || 
+                    portfolio.userId === userEmail || 
+                    portfolio.userId === currentUserId) {
+                  // Check if not already added from portfolios object
+                  const exists = allPortfolios.some(p => p.id === portfolio.id)
+                  if (!exists) {
+                    allPortfolios.push(portfolio)
+                  }
+                }
+              }
+            } catch (parseErr) {
+              console.warn(`Failed to parse portfolio from key ${key}:`, parseErr)
+            }
+          }
+        }
+        
+        // Sort by creation date (newest first)
+        allPortfolios.sort((a, b) => 
+          new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+        )
+        
+        setPortfolios(allPortfolios)
+        console.log('Total portfolios loaded from localStorage:', allPortfolios.length)
+      } catch (localErr) {
+        console.error('Error loading from localStorage:', localErr)
+        setError('Failed to load portfolios')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleView = (portfolio: Portfolio) => {
+    const url = portfolio.slug || portfolio.id
+    window.open(`/portfolio/${url}`, '_blank')
+  }
+
+  const handleEdit = (portfolio: Portfolio) => {
+    navigate(`/portfolio/configure/${portfolio.templateId}`, { 
+      state: { portfolioId: portfolio.id, editMode: true } 
+    })
+  }
+
+  const handleTogglePublish = async (portfolio: Portfolio) => {
+    try {
+      const newPublishStatus = !portfolio.isPublished
+      
+      // Try API first
+      try {
+        await apiClient.put(`/portfolios/${portfolio.id}/publish`, {
+          isPublished: newPublishStatus
+        })
+      } catch (apiErr) {
+        console.warn('API update failed, using localStorage:', apiErr)
+      }
+      
+      // Update localStorage - both formats
+      const updatedPortfolio = {
+        ...portfolio,
+        isPublished: newPublishStatus,
+        ...(newPublishStatus 
+          ? { publishedAt: new Date().toISOString(), unpublishedAt: undefined }
+          : { unpublishedAt: new Date().toISOString() }
+        )
+      }
+      
+      // Update individual portfolio key
+      localStorage.setItem(`portfolio_${portfolio.id}`, JSON.stringify(updatedPortfolio))
+      
+      // Update portfolios object (used by Analytics)
+      const portfoliosObj = localStorage.getItem('portfolios')
+      if (portfoliosObj) {
+        try {
+          const parsedPortfolios = JSON.parse(portfoliosObj)
+          parsedPortfolios[portfolio.id] = updatedPortfolio
+          localStorage.setItem('portfolios', JSON.stringify(parsedPortfolios))
+        } catch (parseErr) {
+          console.warn('Failed to update portfolios object:', parseErr)
+        }
+      }
+      
+      // Update state
+      setPortfolios(portfolios.map(p => 
+        p.id === portfolio.id ? updatedPortfolio : p
+      ))
+      
+      alert(`Portfolio ${newPublishStatus ? 'published' : 'unpublished'} successfully!`)
+    } catch (err) {
+      console.error('Error toggling publish status:', err)
+      alert('Failed to update publish status')
+    }
+  }
+
+  const handleChangeSlug = async (portfolio: Portfolio) => {
+    if (!newSlug.trim()) {
+      alert('Please enter a valid URL slug')
+      return
+    }
+    
+    // Validate slug format
+    const slugRegex = /^[a-z0-9-]+$/
+    if (!slugRegex.test(newSlug)) {
+      alert('URL slug can only contain lowercase letters, numbers, and hyphens')
+      return
+    }
+    
+    try {
+      // Try API first
+      try {
+        await apiClient.put(`/portfolios/${portfolio.id}/slug`, {
+          slug: newSlug
+        })
+      } catch (apiErr) {
+        console.warn('API slug update failed, using localStorage:', apiErr)
+      }
+      
+      // Update localStorage - both formats
+      const updatedPortfolio = {
+        ...portfolio,
+        slug: newSlug
+      }
+      
+      // Update individual portfolio key
+      localStorage.setItem(`portfolio_${portfolio.id}`, JSON.stringify(updatedPortfolio))
+      
+      // Update portfolios object (used by Analytics)
+      const portfoliosObj = localStorage.getItem('portfolios')
+      if (portfoliosObj) {
+        try {
+          const parsedPortfolios = JSON.parse(portfoliosObj)
+          parsedPortfolios[portfolio.id] = updatedPortfolio
+          localStorage.setItem('portfolios', JSON.stringify(parsedPortfolios))
+        } catch (parseErr) {
+          console.warn('Failed to update portfolios object:', parseErr)
+        }
+      }
+      
+      // Update state
+      setPortfolios(portfolios.map(p => 
+        p.id === portfolio.id ? updatedPortfolio : p
+      ))
+      
+      setEditingSlug(null)
+      setNewSlug('')
+      alert('Portfolio URL updated successfully!')
+    } catch (err) {
+      console.error('Error updating slug:', err)
+      alert('Failed to update portfolio URL')
+    }
+  }
+
+  const handleDelete = async (portfolio: Portfolio) => {
+    if (deleteConfirm !== portfolio.id) {
+      setDeleteConfirm(portfolio.id)
+      return
+    }
+    
+    try {
+      // Try API first
+      try {
+        await apiClient.delete(`/portfolios/${portfolio.id}`)
+      } catch (apiErr) {
+        console.warn('API delete failed, using localStorage:', apiErr)
+      }
+      
+      // Delete from localStorage - both formats
+      // Delete individual portfolio key
+      localStorage.removeItem(`portfolio_${portfolio.id}`)
+      
+      // Delete from portfolios object (used by Analytics)
+      const portfoliosObj = localStorage.getItem('portfolios')
+      if (portfoliosObj) {
+        try {
+          const parsedPortfolios = JSON.parse(portfoliosObj)
+          delete parsedPortfolios[portfolio.id]
+          localStorage.setItem('portfolios', JSON.stringify(parsedPortfolios))
+        } catch (parseErr) {
+          console.warn('Failed to update portfolios object:', parseErr)
+        }
+      }
+      
+      // Also delete related data
+      localStorage.removeItem(`projects_${portfolio.id}`)
+      localStorage.removeItem(`skills_${portfolio.id}`)
+      localStorage.removeItem(`testimonials_${portfolio.id}`)
+      
+      // Update state
+      setPortfolios(portfolios.filter(p => p.id !== portfolio.id))
+      setDeleteConfirm(null)
+      
+      alert('Portfolio deleted permanently!')
+    } catch (err) {
+      console.error('Error deleting portfolio:', err)
+      alert('Failed to delete portfolio')
+    }
+  }
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A'
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  if (loading) {
+    return (
+      <div className="my-portfolios-container">
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading your portfolios...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="my-portfolios-container">
+      {/* Header */}
+      <motion.div
+        className="portfolios-header"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="header-content">
+          <h1 className="page-title">My Portfolios</h1>
+          <p className="page-subtitle">
+            Manage all your published portfolios in one place
+          </p>
+        </div>
+        <button
+          className="create-portfolio-btn"
+          onClick={() => navigate('/templates')}
+        >
+          <Plus size={20} />
+          Create New Portfolio
+        </button>
+      </motion.div>
+
+      {/* Error State */}
+      {error && (
+        <motion.div
+          className="error-banner"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <AlertCircle size={20} />
+          <span>{error}</span>
+        </motion.div>
+      )}
+
+      {/* Portfolios Grid */}
+      {portfolios.length === 0 ? (
+        <motion.div
+          className="empty-state"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="empty-icon">
+            <Globe size={64} />
+          </div>
+          <h2>No Portfolios Yet</h2>
+          <p>Start creating your first portfolio to showcase your work</p>
+          <button
+            className="create-portfolio-btn"
+            onClick={() => navigate('/templates')}
+          >
+            <Plus size={20} />
+            Create Your First Portfolio
+          </button>
+        </motion.div>
+      ) : (
+        <div className="portfolios-grid">
+          {portfolios.map((portfolio, index) => (
+            <motion.div
+              key={portfolio.id}
+              className="portfolio-card"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+            >
+              {/* Card Header with Status Badge */}
+              <div className="card-header">
+                <div className="status-badge-container">
+                  <div className={`status-badge ${portfolio.isPublished ? 'published' : 'unpublished'}`}>
+                    {portfolio.isPublished ? (
+                      <>
+                        <Globe size={14} />
+                        <span>Published</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock size={14} />
+                        <span>Unpublished</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <h3 className="portfolio-name">{portfolio.name || 'Untitled Portfolio'}</h3>
+                <p className="portfolio-headline">{portfolio.headline}</p>
+              </div>
+
+              {/* Portfolio Info */}
+              <div className="portfolio-info">
+                <div className="info-row">
+                  <Calendar size={16} />
+                  <span className="info-label">Created:</span>
+                  <span className="info-value">{formatDate(portfolio.createdAt)}</span>
+                </div>
+                {portfolio.isPublished && portfolio.publishedAt && (
+                  <div className="info-row">
+                    <Globe size={16} />
+                    <span className="info-label">Published:</span>
+                    <span className="info-value">{formatDate(portfolio.publishedAt)}</span>
+                  </div>
+                )}
+                <div className="info-row stats-row">
+                  <div className="stat">
+                    <TrendingUp size={16} />
+                    <span>{portfolio.views || 0} views</span>
+                  </div>
+                  <div className="stat">
+                    <Heart size={16} />
+                    <span>{portfolio.likes || 0} likes</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* URL Section */}
+              <div className="url-section">
+                {editingSlug === portfolio.id ? (
+                  <div className="url-edit-container">
+                    <div className="url-input-group">
+                      <LinkIcon size={16} />
+                      <input
+                        type="text"
+                        className="url-input"
+                        value={newSlug}
+                        onChange={(e) => setNewSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                        placeholder="Enter new URL slug"
+                        autoFocus
+                      />
+                    </div>
+                    <div className="url-actions">
+                      <button
+                        className="url-action-btn save"
+                        onClick={() => handleChangeSlug(portfolio)}
+                        title="Save"
+                      >
+                        <Check size={16} />
+                      </button>
+                      <button
+                        className="url-action-btn cancel"
+                        onClick={() => {
+                          setEditingSlug(null)
+                          setNewSlug('')
+                        }}
+                        title="Cancel"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="url-display">
+                    <LinkIcon size={16} />
+                    <span className="url-text">
+                      /portfolio/{portfolio.slug || portfolio.id}
+                    </span>
+                    <button
+                      className="url-change-btn"
+                      onClick={() => {
+                        setEditingSlug(portfolio.id)
+                        setNewSlug(portfolio.slug || '')
+                      }}
+                      title="Change URL"
+                    >
+                      Edit URL
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="card-actions">
+                <button
+                  className="action-btn view-btn"
+                  onClick={() => handleView(portfolio)}
+                  title="View Portfolio"
+                >
+                  <Eye size={18} />
+                  <span>View</span>
+                </button>
+                <button
+                  className="action-btn edit-btn"
+                  onClick={() => handleEdit(portfolio)}
+                  title="Edit Portfolio"
+                >
+                  <Edit size={18} />
+                  <span>Edit</span>
+                </button>
+                <button
+                  className={`action-btn publish-btn ${portfolio.isPublished ? 'unpublish' : 'publish'}`}
+                  onClick={() => handleTogglePublish(portfolio)}
+                  title={portfolio.isPublished ? 'Unpublish' : 'Publish'}
+                >
+                  {portfolio.isPublished ? (
+                    <>
+                      <Lock size={18} />
+                      <span>Unpublish</span>
+                    </>
+                  ) : (
+                    <>
+                      <Globe size={18} />
+                      <span>Publish</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  className={`action-btn delete-btn ${deleteConfirm === portfolio.id ? 'confirm' : ''}`}
+                  onClick={() => handleDelete(portfolio)}
+                  title={deleteConfirm === portfolio.id ? 'Click again to confirm' : 'Delete Portfolio'}
+                >
+                  <Trash2 size={18} />
+                  <span>{deleteConfirm === portfolio.id ? 'Confirm?' : 'Delete'}</span>
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default MyPortfolios

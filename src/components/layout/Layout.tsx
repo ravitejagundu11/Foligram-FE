@@ -4,7 +4,7 @@ import { useAuth } from '@contexts/AuthContext'
 import { useState } from 'react'
 import Footer from './Footer'
 import PageSelector from '@components/common/PageSelector'
-import { Home, FileText, Calendar, BarChart3, Settings, LogOut, UserCircle, Users, Book, ChevronLeft, ChevronRight, Bell, User, Layout as LayoutIcon, Shield } from 'lucide-react'
+import { Home, FileText, Calendar, BarChart3, Settings, LogOut, UserCircle, Users, Book, ChevronLeft, ChevronRight, Bell, User, Layout as LayoutIcon, Shield, Folders } from 'lucide-react'
 import '../../styles/Layout.css'
 
 const Layout = () => {
@@ -102,6 +102,15 @@ const Layout = () => {
                   <LayoutIcon size={24} />
                   {!isSidebarCollapsed && <span className="nav-label">Templates</span>}
                   {isSidebarCollapsed && <span className="nav-tooltip">Templates</span>}
+                </button>
+                <button
+                  className={`sidebar-nav-item ${isActive('/my-portfolios') ? 'active' : ''}`}
+                  onClick={() => navigate('/my-portfolios')}
+                  title="My Portfolios"
+                >
+                  <Folders size={24} />
+                  {!isSidebarCollapsed && <span className="nav-label">My Portfolios</span>}
+                  {isSidebarCollapsed && <span className="nav-tooltip">My Portfolios</span>}
                 </button>
                 <button
                   className={`sidebar-nav-item ${isActive('/appointment-management') ? 'active' : ''}`}

@@ -27,6 +27,7 @@ import NotificationsPage from '@pages/NotificationsPage'
 import NotFound from '@pages/NotFound'
 import AppointmentManagement from './pages/AppointmentManagement'
 import BookingPage from './pages/BookingPage'
+import MyPortfolios from './pages/MyPortfolios'
 
 function App() {
   return (
@@ -59,6 +60,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["user", "admin", "recruiter"]}>
                     <PortfolioConfig />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="my-portfolios"
+                element={
+                  <ProtectedRoute allowedRoles={["user", "admin", "recruiter"]}>
+                    <MyPortfolios />
                   </ProtectedRoute>
                 }
               />
