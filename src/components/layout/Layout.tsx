@@ -1,6 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '@contexts/AuthContext'
+import { useNotification } from '@contexts/NotificationContext'
 import { useState } from 'react'
 import Footer from './Footer'
 import PageSelector from '@components/common/PageSelector'
@@ -12,6 +13,7 @@ const Layout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { isAuthenticated, user, logout, hasRole } = useAuth()
+  const { unreadCount } = useNotification()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const isAdmin = hasRole(['admin'])
 
@@ -135,7 +137,14 @@ const Layout = () => {
                   onClick={() => navigate('/notifications')}
                   title="Notifications"
                 >
-                  <Bell size={24} />
+                  <div className="sidebar-icon-wrapper">
+                    <Bell size={24} />
+                    {unreadCount > 0 && (
+                      <span className="sidebar-notification-badge">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </div>
                   {!isSidebarCollapsed && <span className="nav-label">Notifications</span>}
                   {isSidebarCollapsed && <span className="nav-tooltip">Notifications</span>}
                 </button>

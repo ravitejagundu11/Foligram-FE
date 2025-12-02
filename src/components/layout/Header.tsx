@@ -87,7 +87,15 @@ const Header = () => {
                   <Link to="/analytics" className={getLinkClassName('/analytics')}>
                     Analytics
                   </Link>
-                  <Link to="/appointment-management" className={getLinkClassName('/appointment-managemnet')}>
+                  <Link to="/notifications" className={getLinkClassName('/notifications')}>
+                    Notifications
+                    {unreadCount > 0 && (
+                      <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </Link>
+                  <Link to="/appointment-management" className={getLinkClassName('/appointment-management')}>
                     Appointment Management
                   </Link>
                   <Link to="/booking-page" className={getLinkClassName('/booking-page')}>

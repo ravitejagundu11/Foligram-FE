@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FiCalendar, FiClock, FiUser, FiMail, FiPhone, FiBriefcase, FiMessageSquare } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiClient } from "../services/api";
+import { useNotification } from "../contexts/NotificationContext";
 import type { CreateAppointmentData } from "../types/appointment";
 import type { Portfolio } from "../types/portfolio";
 
@@ -20,6 +21,7 @@ const timeSlots = [
 const BookingPage: React.FC = () => {
   const { portfolioId } = useParams<{ portfolioId: string }>();
   const navigate = useNavigate();
+  const { addNotification } = useNotification();
   
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
@@ -134,6 +136,20 @@ const BookingPage: React.FC = () => {
 
       const existingAppointments = JSON.parse(localStorage.getItem('appointments') || '[]');
       localStorage.setItem('appointments', JSON.stringify([...existingAppointments, appointment]));
+      
+      // Send notification to portfolio owner about new appointment
+      if (portfolio.userId) {
+        addNotification({
+          type: 'appointment',
+          recipientUsername: portfolio.userId,
+          actorUsername: formData.bookerEmail,
+          actorName: formData.bookerName,
+          appointmentId: appointment.id,
+          appointmentDate: formData.date,
+          appointmentTime: formData.time,
+          message: `booked an appointment for ${new Date(formData.date).toLocaleDateString()} at ${formData.time}`,
+        });
+      }
       
       setConfirmed(true);
     } finally {

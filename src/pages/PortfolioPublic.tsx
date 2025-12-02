@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
+import { useSubscription } from '../contexts/SubscriptionContext'
 import { 
   ExternalLink, 
   Github, 
@@ -39,6 +40,7 @@ const PortfolioPublic = () => {
   const { username, portfolioId } = useParams<{ username?: string; portfolioId?: string }>()
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
+  const { subscribe, unsubscribe, isSubscribed: checkSubscribed } = useSubscription()
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [skills, setSkills] = useState<Skill[]>([])
@@ -63,8 +65,8 @@ const PortfolioPublic = () => {
   const [contactSuccess, setContactSuccess] = useState(false)
   
   // Subscription State
-  const [isSubscribed, setIsSubscribed] = useState(false)
   const [subscribing, setSubscribing] = useState(false)
+  const isSubscribed = portfolio?.userId ? checkSubscribed(portfolio.userId) : false
 
   // Template Renderer Function
   const renderTemplate = () => {
@@ -301,63 +303,28 @@ const PortfolioPublic = () => {
     navigate(`/booking/${portfolio?.id || portfolioId}`)
   }
 
-  const handleSubscribe = async () => {
-    if (!portfolio) return
+  const handleSubscribe = () => {
+    if (!portfolio || !portfolio.userId) return
     
     // Prevent users from subscribing to their own portfolio
     if (currentUser) {
-      const storedUser = localStorage.getItem('user')
-      const currentUserId = storedUser ? JSON.parse(storedUser).username : null
-      
-      // Check multiple possible matches
       if (portfolio.userId === currentUser.username || 
           portfolio.userId === currentUser.email || 
-          portfolio.userId === currentUserId ||
           portfolio.name === currentUser.username) {
-        alert('❌ You cannot subscribe to your own portfolio!');
-        return;
+        alert('❌ You cannot subscribe to your own portfolio!')
+        return
       }
     }
     
     setSubscribing(true)
     try {
-      // Check current subscription status
-      const currentStatus = isSubscribed
-      
-      if (currentStatus) {
-        // Unsubscribe
-        await apiClient.delete(`/subscriptions/${portfolio.id}`)
-        setIsSubscribed(false)
-        alert('✓ You have unsubscribed from updates!')
-      } else {
-        // Subscribe
-        await apiClient.post('/subscriptions', {
-          portfolioId: portfolio.id,
-          subscribedAt: new Date().toISOString()
-        })
-        setIsSubscribed(true)
-        alert('✓ You are now subscribed to updates!')
-      }
-    } catch (error: any) {
-      console.warn('Subscription API not available, using local storage:', error.message)
-      
-      // Fallback: Use localStorage
-      const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}')
-      
       if (isSubscribed) {
-        delete subscriptions[portfolio.id]
-        setIsSubscribed(false)
+        unsubscribe(portfolio.userId)
         alert('✓ You have unsubscribed from updates!')
       } else {
-        subscriptions[portfolio.id] = {
-          portfolioId: portfolio.id,
-          subscribedAt: new Date().toISOString()
-        }
-        setIsSubscribed(true)
+        subscribe(portfolio.userId)
         alert('✓ You are now subscribed to updates!')
       }
-      
-      localStorage.setItem('subscriptions', JSON.stringify(subscriptions))
     } finally {
       setSubscribing(false)
     }

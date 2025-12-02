@@ -1,150 +1,125 @@
-"use client";
-
-import { useEffect, useState, useRef } from "react";
-import { Card, CardContent } from "../components/ui/card";
-
-interface Notification {
-  id: string;
-  message: string;
-  time: string;
-  image?: string;
-  isRead: boolean;
-}
+import { useEffect, useRef } from 'react'
+import { Card, CardContent } from '../components/ui/card'
+import { useNotification } from '@contexts/NotificationContext'
+import { useNavigate } from 'react-router-dom'
 
 export default function NotificationPanel({ onClose }: { onClose: () => void }) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const { notifications, markAsRead } = useNotification()
+  const panelRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
 
-  // ---------------------------
-  // MOCK DATA (FALLBACK)
-  // ---------------------------
-  const mockNotifications: Notification[] = [
-    { id: "1", message: "New appointment booked by John Doe", time: "2h ago", image: "/image/notifications.png", isRead: false },
-    { id: "2", message: "Your folio was viewed by a recruiter", time: "5h ago", image: "/image/notifications.png", isRead: true },
-    { id: "3", message: "New message from HR", time: "1d ago", image: "/image/notifications.png", isRead: true },
-  ];
+  const formatTime = (timestamp: number) => {
+    const now = Date.now()
+    const diff = now - timestamp
+    const minutes = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    const days = Math.floor(diff / 86400000)
 
-  useEffect(() => {
-    async function fetchNotifications() {
-      try {
-        /*
-        const res = await fetch(`/api/notifications/${user_id}`);
-        if (!res.ok) throw new Error("Failed to fetch notifications");
-
-        const json = await res.json();
-        setNotifications(json.notifications);
-        return;
-        */
-        console.warn("Backend disabled → using mock notifications");
-        setNotifications(mockNotifications);
-      } catch (err) {
-        console.warn("Error → using mock notifications");
-        setNotifications(mockNotifications);
-      }
-    }
-
-    fetchNotifications();
-
-    // ---------------------------
-    // POLLING FOR REAL-TIME EVENTS
-    // ---------------------------
-    const interval = setInterval(() => {
-      const newNoti: Notification = {
-        id: Date.now().toString(),
-        message: "New booking received!",
-        time: "just now",
-        image: "/images/notifications.png",
-        isRead: false,
-      };
-
-      showToast("🔔 New booking received!");
-      setNotifications((prev) => [newNoti, ...prev]);
-    }, 25000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // ---------------------------
-  // SIMPLE BUILT-IN TOAST
-  // ---------------------------
-  function showToast(msg: string) {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 3000);
+    if (minutes < 1) return 'just now'
+    if (minutes < 60) return `${minutes}m ago`
+    if (hours < 24) return `${hours}h ago`
+    return `${days}d ago`
   }
 
-  // ---------------------------
-  // CLOSE ON CLICK OUTSIDE
-  // ---------------------------
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        onClose();
+        onClose()
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [onClose])
 
-  // ---------------------------
-  // MARK NOTIFICATION AS READ
-  // ---------------------------
-  async function markAsRead(id: string) {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
-
-    /*
-    await fetch(`/api/notifications/${id}/read`, {
-      method: "PUT",
-    });
-    */
+  const handleNotificationClick = (notification: any) => {
+    markAsRead(notification.id)
+    
+    // Navigate to relevant page based on notification type
+    if (notification.type === 'appointment') {
+      navigate('/appointment-management')
+      onClose()
+    } else if (notification.postId) {
+      navigate(`/blog/${notification.postId}`)
+      onClose()
+    }
   }
 
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'like':
+        return '❤️'
+      case 'comment':
+        return '💬'
+      case 'reply':
+        return '↩️'
+      case 'share':
+        return '🔄'
+      case 'subscription':
+        return '🔔'
+      case 'mention':
+        return '📢'
+      case 'appointment':
+        return '📅'
+      default:
+        return '📬'
+    }
+  }
+
+  // Show only latest 10 notifications in dropdown
+  const recentNotifications = notifications.slice(0, 10)
+
   return (
-    <>
-      {/* Toast */}
-      {toastMsg && (
-        <div className="fixed top-5 right-5 bg-black text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in">
-          {toastMsg}
+    <Card
+      ref={panelRef}
+      className="absolute right-0 mt-3 w-96 shadow-xl rounded-xl border bg-white z-50 animate-fade-in"
+    >
+      <CardContent className="p-0">
+        <div className="flex items-center justify-between p-3 border-b">
+          <h2 className="text-lg font-semibold">Notifications</h2>
+          <button
+            onClick={() => {
+              navigate('/notifications')
+              onClose()
+            }}
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+          >
+            View All
+          </button>
         </div>
-      )}
 
-      {/* Dropdown Panel */}
-      <Card
-        ref={panelRef}
-        className="absolute right-0 mt-3 w-80 shadow-xl rounded-xl border bg-white z-50 animate-fade-in"
-      >
-        <CardContent className="p-0">
-          <h2 className="text-lg font-semibold p-3 border-b">Notifications</h2>
-
-          {notifications.length === 0 ? (
-            <p className="p-4 text-center text-gray-500">No notifications</p>
-          ) : (
-            <div className="max-h-80 overflow-auto">
-              {notifications.map((n) => (
-                <div
-                  key={n.id}
-                  onClick={() => markAsRead(n.id)}
-                  className={`flex items-center gap-3 p-3 cursor-pointer transition hover:bg-gray-100 border-b ${!n.isRead ? "bg-blue-50" : ""}`}
-                >
-                  <img
-                    src={n.image || "/default-avatar.png"}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{n.message}</p>
-                    <span className="text-xs text-gray-500">{n.time}</span>
-                  </div>
-
-                  {!n.isRead && <span className="w-2 h-2 bg-blue-500 rounded-full" />}
+        {recentNotifications.length === 0 ? (
+          <div className="p-8 text-center">
+            <div className="text-4xl mb-2">🔔</div>
+            <p className="text-gray-500 text-sm">No notifications yet</p>
+          </div>
+        ) : (
+          <div className="max-h-96 overflow-auto">
+            {recentNotifications.map((n) => (
+              <div
+                key={n.id}
+                onClick={() => handleNotificationClick(n)}
+                className={`flex items-start gap-3 p-3 cursor-pointer transition hover:bg-gray-50 border-b last:border-b-0 ${!n.read ? 'bg-blue-50' : ''}`}
+              >
+                <div className="text-2xl flex-shrink-0">
+                  {getNotificationIcon(n.type)}
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </>
-  );
+
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm ${!n.read ? 'font-semibold' : ''}`}>
+                    <span className="font-semibold">{n.actorName}</span> {n.message}
+                    {n.postTitle && (
+                      <span className="text-gray-600"> "{n.postTitle.substring(0, 30)}{n.postTitle.length > 30 ? '...' : ''}"</span>
+                    )}
+                  </p>
+                  <span className="text-xs text-gray-500">{formatTime(n.timestamp)}</span>
+                </div>
+
+                {!n.read && <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />}
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
 }
