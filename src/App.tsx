@@ -6,6 +6,7 @@ import { SubscriptionProvider } from '@contexts/SubscriptionContext'
 import { NotificationProvider } from '@contexts/NotificationContext'
 import Layout from '@components/layout/Layout'
 import ProtectedRoute from '@components/ProtectedRoute'
+import ErrorBoundary from '@components/ErrorBoundary'
 import HomePage from '@pages/HomePage'
 import WelcomePage from '@pages/WelcomePage'
 import TemplateSelection from '@pages/TemplateSelection'
@@ -37,11 +38,12 @@ import AdminNotificationsPage from './pages/admin/AdminNotificationsPage'
 
 function App() {
   return (
-    <AuthProvider>
-      <UserManagementProvider>
-        <NotificationProvider>
-          <BlogProvider>
-            <SubscriptionProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <UserManagementProvider>
+          <NotificationProvider>
+            <BlogProvider>
+              <SubscriptionProvider>
               <Routes>
             {/* Public Portfolio View - No Layout */}
             <Route path="/portfolio/:portfolioId" element={<PortfolioPublic />} />
@@ -198,11 +200,12 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
-            </SubscriptionProvider>
-          </BlogProvider>
-        </NotificationProvider>
-      </UserManagementProvider>
-    </AuthProvider>
+              </SubscriptionProvider>
+            </BlogProvider>
+          </NotificationProvider>
+        </UserManagementProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 

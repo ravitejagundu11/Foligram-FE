@@ -44,6 +44,21 @@ export default function AnalyticsPage() {
   const [subscribers, setSubscribers] = useState<any[]>([]);
   const [mySubscriptions, setMySubscriptions] = useState<any[]>([]);
 
+  // Calculate overall statistics
+  const overallStats = {
+    totalPortfolios: allPortfolios.length,
+    publishedPortfolios: allPortfolios.filter(p => p.isPublished).length,
+    totalPortfolioViews: allPortfolios.reduce((sum, p) => sum + (p.views || 0), 0),
+    totalPortfolioLikes: allPortfolios.reduce((sum, p) => sum + (p.likes || 0), 0),
+    totalBlogPosts: allBlogPosts.length,
+    publishedBlogPosts: allBlogPosts.filter(p => p.published).length,
+    totalBlogLikes: allBlogPosts.reduce((sum, p) => sum + (p.likes?.length || 0), 0),
+    totalBlogComments: allBlogPosts.reduce((sum, p) => sum + (p.comments?.length || 0), 0),
+    totalBlogShares: allBlogPosts.reduce((sum, p) => sum + (p.shares || 0), 0),
+    totalSubscribers: subscribers.length,
+    totalSubscriptions: mySubscriptions.length
+  };
+
   useEffect(() => {
     async function loadPortfolios() {
       try {
@@ -557,6 +572,111 @@ export default function AnalyticsPage() {
       />
       
       <div className="p-6 space-y-8 w-full max-w-6xl mx-auto">
+
+      {/* OVERALL STATISTICS DASHBOARD */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="shadow-md rounded-xl border-l-4 border-blue-500">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="text-sm text-gray-600 font-medium">Total Portfolios</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{overallStats.totalPortfolios}</p>
+                <p className="text-xs text-gray-500 mt-1">{overallStats.publishedPortfolios} published</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Eye size={24} className="text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md rounded-xl border-l-4 border-green-500">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="text-sm text-gray-600 font-medium">Portfolio Views</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{overallStats.totalPortfolioViews}</p>
+                <p className="text-xs text-gray-500 mt-1">{overallStats.totalPortfolioLikes} likes</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Eye size={24} className="text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md rounded-xl border-l-4 border-purple-500">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="text-sm text-gray-600 font-medium">Blog Posts</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{overallStats.totalBlogPosts}</p>
+                <p className="text-xs text-gray-500 mt-1">{overallStats.publishedBlogPosts} published</p>
+              </div>
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <FileText size={24} className="text-purple-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md rounded-xl border-l-4 border-pink-500">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="text-sm text-gray-600 font-medium">Total Engagement</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{overallStats.totalBlogLikes + overallStats.totalBlogComments + overallStats.totalBlogShares}</p>
+                <p className="text-xs text-gray-500 mt-1">{overallStats.totalSubscribers} subscribers</p>
+              </div>
+              <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
+                <Heart size={24} className="text-pink-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* DETAILED ENGAGEMENT STATISTICS */}
+      <Card className="shadow-md rounded-xl border border-gray-200">
+        <CardContent className="p-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <BarChart size={20} className="text-indigo-600" />
+            Engagement Breakdown
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="text-center p-4 bg-red-50 rounded-lg border border-red-100">
+              <Heart size={24} className="text-red-500 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-gray-900">{overallStats.totalBlogLikes}</p>
+              <p className="text-xs text-gray-600">Blog Likes</p>
+            </div>
+            <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-100">
+              <MessageCircle size={24} className="text-blue-500 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-gray-900">{overallStats.totalBlogComments}</p>
+              <p className="text-xs text-gray-600">Comments</p>
+            </div>
+            <div className="text-center p-4 bg-green-50 rounded-lg border border-green-100">
+              <Share2 size={24} className="text-green-500 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-gray-900">{overallStats.totalBlogShares}</p>
+              <p className="text-xs text-gray-600">Shares</p>
+            </div>
+            <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-100">
+              <Eye size={24} className="text-purple-500 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-gray-900">{overallStats.totalPortfolioViews}</p>
+              <p className="text-xs text-gray-600">Portfolio Views</p>
+            </div>
+            <div className="text-center p-4 bg-pink-50 rounded-lg border border-pink-100">
+              <Heart size={24} className="text-pink-500 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-gray-900">{overallStats.totalPortfolioLikes}</p>
+              <p className="text-xs text-gray-600">Portfolio Likes</p>
+            </div>
+            <div className="text-center p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+              <Eye size={24} className="text-indigo-500 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-gray-900">{overallStats.totalSubscribers}</p>
+              <p className="text-xs text-gray-600">Subscribers</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* PUBLISHED PORTFOLIOS SECTION */}
       <Card className="shadow-md rounded-xl border border-gray-200">
@@ -1123,19 +1243,23 @@ export default function AnalyticsPage() {
       {selectedPortfolio && (
         <Card className="shadow-md rounded-xl border border-gray-200">
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Views Over Time</h2>
+            <h2 className="text-xl font-semibold mb-4">Views Over Time (Simulated Weekly Data)</h2>
             <div className="w-full h-80">
               <ResponsiveContainer>
                 <LineChart
-                  data={[
-                    { date: 'Mon', views: Math.floor(Math.random() * 50) + 10 },
-                    { date: 'Tue', views: Math.floor(Math.random() * 50) + 10 },
-                    { date: 'Wed', views: Math.floor(Math.random() * 50) + 10 },
-                    { date: 'Thu', views: Math.floor(Math.random() * 50) + 10 },
-                    { date: 'Fri', views: Math.floor(Math.random() * 50) + 10 },
-                    { date: 'Sat', views: Math.floor(Math.random() * 50) + 10 },
-                    { date: 'Sun', views: Math.floor(Math.random() * 50) + 10 },
-                  ]}
+                  data={(() => {
+                    const totalViews = selectedPortfolio.views || 0;
+                    const avgPerDay = Math.ceil(totalViews / 7);
+                    return [
+                      { date: 'Mon', views: Math.max(1, Math.floor(avgPerDay * (0.8 + Math.random() * 0.4))) },
+                      { date: 'Tue', views: Math.max(1, Math.floor(avgPerDay * (0.8 + Math.random() * 0.4))) },
+                      { date: 'Wed', views: Math.max(1, Math.floor(avgPerDay * (0.8 + Math.random() * 0.4))) },
+                      { date: 'Thu', views: Math.max(1, Math.floor(avgPerDay * (0.8 + Math.random() * 0.4))) },
+                      { date: 'Fri', views: Math.max(1, Math.floor(avgPerDay * (0.8 + Math.random() * 0.4))) },
+                      { date: 'Sat', views: Math.max(1, Math.floor(avgPerDay * (0.8 + Math.random() * 0.4))) },
+                      { date: 'Sun', views: Math.max(1, Math.floor(avgPerDay * (0.8 + Math.random() * 0.4))) },
+                    ];
+                  })()}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                   <XAxis dataKey="date" stroke="#666" />
@@ -1154,19 +1278,27 @@ export default function AnalyticsPage() {
       {selectedBlogPost && (
         <Card className="shadow-md rounded-xl border border-gray-200">
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Engagement Over Time</h2>
+            <h2 className="text-xl font-semibold mb-4">Engagement Over Time (Simulated Weekly Data)</h2>
             <div className="w-full h-80">
               <ResponsiveContainer>
                 <LineChart
-                  data={[
-                    { date: 'Mon', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { date: 'Tue', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { date: 'Wed', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { date: 'Thu', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { date: 'Fri', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { date: 'Sat', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { date: 'Sun', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                  ]}
+                  data={(() => {
+                    const totalLikes = selectedBlogPost.likes?.length || 0;
+                    const totalComments = selectedBlogPost.comments?.length || 0;
+                    const totalShares = selectedBlogPost.shares || 0;
+                    const avgLikes = Math.ceil(totalLikes / 7);
+                    const avgComments = Math.ceil(totalComments / 7);
+                    const avgShares = Math.ceil(totalShares / 7);
+                    return [
+                      { date: 'Mon', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { date: 'Tue', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { date: 'Wed', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { date: 'Thu', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { date: 'Fri', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { date: 'Sat', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { date: 'Sun', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                    ];
+                  })()}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                   <XAxis dataKey="date" stroke="#666" />
@@ -1187,19 +1319,25 @@ export default function AnalyticsPage() {
       {selectedPortfolio && (
         <Card className="shadow-md rounded-xl border border-gray-200">
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Weekly Performance</h2>
+            <h2 className="text-xl font-semibold mb-4">Weekly Performance (Based on Total Data)</h2>
             <div className="w-full h-80">
               <ResponsiveContainer>
                 <RechartsBarChart
-                  data={[
-                    { day: 'Mon', views: Math.floor(Math.random() * 50) + 10, likes: Math.floor(Math.random() * 20) + 5 },
-                    { day: 'Tue', views: Math.floor(Math.random() * 50) + 10, likes: Math.floor(Math.random() * 20) + 5 },
-                    { day: 'Wed', views: Math.floor(Math.random() * 50) + 10, likes: Math.floor(Math.random() * 20) + 5 },
-                    { day: 'Thu', views: Math.floor(Math.random() * 50) + 10, likes: Math.floor(Math.random() * 20) + 5 },
-                    { day: 'Fri', views: Math.floor(Math.random() * 50) + 10, likes: Math.floor(Math.random() * 20) + 5 },
-                    { day: 'Sat', views: Math.floor(Math.random() * 50) + 10, likes: Math.floor(Math.random() * 20) + 5 },
-                    { day: 'Sun', views: Math.floor(Math.random() * 50) + 10, likes: Math.floor(Math.random() * 20) + 5 },
-                  ]}
+                  data={(() => {
+                    const totalViews = selectedPortfolio.views || 0;
+                    const totalLikes = selectedPortfolio.likes || 0;
+                    const avgViews = Math.ceil(totalViews / 7);
+                    const avgLikes = Math.ceil(totalLikes / 7);
+                    return [
+                      { day: 'Mon', views: Math.max(1, Math.floor(avgViews * (0.7 + Math.random() * 0.6))), likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Tue', views: Math.max(1, Math.floor(avgViews * (0.7 + Math.random() * 0.6))), likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Wed', views: Math.max(1, Math.floor(avgViews * (0.7 + Math.random() * 0.6))), likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Thu', views: Math.max(1, Math.floor(avgViews * (0.7 + Math.random() * 0.6))), likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Fri', views: Math.max(1, Math.floor(avgViews * (0.7 + Math.random() * 0.6))), likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Sat', views: Math.max(1, Math.floor(avgViews * (0.7 + Math.random() * 0.6))), likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Sun', views: Math.max(1, Math.floor(avgViews * (0.7 + Math.random() * 0.6))), likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))) },
+                    ];
+                  })()}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                   <XAxis dataKey="day" stroke="#666" />
@@ -1219,19 +1357,27 @@ export default function AnalyticsPage() {
       {selectedBlogPost && (
         <Card className="shadow-md rounded-xl border border-gray-200">
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Weekly Engagement</h2>
+            <h2 className="text-xl font-semibold mb-4">Weekly Engagement (Based on Total Data)</h2>
             <div className="w-full h-80">
               <ResponsiveContainer>
                 <RechartsBarChart
-                  data={[
-                    { day: 'Mon', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { day: 'Tue', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { day: 'Wed', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { day: 'Thu', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { day: 'Fri', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { day: 'Sat', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                    { day: 'Sun', likes: Math.floor(Math.random() * 20), comments: Math.floor(Math.random() * 10), shares: Math.floor(Math.random() * 5) },
-                  ]}
+                  data={(() => {
+                    const totalLikes = selectedBlogPost.likes?.length || 0;
+                    const totalComments = selectedBlogPost.comments?.length || 0;
+                    const totalShares = selectedBlogPost.shares || 0;
+                    const avgLikes = Math.ceil(totalLikes / 7);
+                    const avgComments = Math.ceil(totalComments / 7);
+                    const avgShares = Math.ceil(totalShares / 7);
+                    return [
+                      { day: 'Mon', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Tue', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Wed', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Thu', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Fri', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Sat', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                      { day: 'Sun', likes: Math.max(0, Math.floor(avgLikes * (0.7 + Math.random() * 0.6))), comments: Math.max(0, Math.floor(avgComments * (0.7 + Math.random() * 0.6))), shares: Math.max(0, Math.floor(avgShares * (0.7 + Math.random() * 0.6))) },
+                    ];
+                  })()}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                   <XAxis dataKey="day" stroke="#666" />
@@ -1252,18 +1398,22 @@ export default function AnalyticsPage() {
       {selectedPortfolio && (
         <Card className="shadow-md rounded-xl border border-gray-200">
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Cumulative Growth</h2>
+            <h2 className="text-xl font-semibold mb-4">Cumulative Growth (Projected)</h2>
             <div className="w-full h-80">
               <ResponsiveContainer>
                 <AreaChart
-                  data={[
-                    { month: 'Jan', views: 120, likes: 45 },
-                    { month: 'Feb', views: 245, likes: 98 },
-                    { month: 'Mar', views: 390, likes: 156 },
-                    { month: 'Apr', views: 565, likes: 223 },
-                    { month: 'May', views: 720, likes: 312 },
-                    { month: 'Jun', views: 890, likes: 401 },
-                  ]}
+                  data={(() => {
+                    const totalViews = selectedPortfolio.views || 0;
+                    const totalLikes = selectedPortfolio.likes || 0;
+                    return [
+                      { month: 'Jan', views: Math.floor(totalViews * 0.15), likes: Math.floor(totalLikes * 0.12) },
+                      { month: 'Feb', views: Math.floor(totalViews * 0.28), likes: Math.floor(totalLikes * 0.24) },
+                      { month: 'Mar', views: Math.floor(totalViews * 0.45), likes: Math.floor(totalLikes * 0.38) },
+                      { month: 'Apr', views: Math.floor(totalViews * 0.63), likes: Math.floor(totalLikes * 0.56) },
+                      { month: 'May', views: Math.floor(totalViews * 0.82), likes: Math.floor(totalLikes * 0.78) },
+                      { month: 'Jun', views: totalViews, likes: totalLikes },
+                    ];
+                  })()}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                   <XAxis dataKey="month" stroke="#666" />
@@ -1283,18 +1433,23 @@ export default function AnalyticsPage() {
       {selectedBlogPost && (
         <Card className="shadow-md rounded-xl border border-gray-200">
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Cumulative Engagement</h2>
+            <h2 className="text-xl font-semibold mb-4">Cumulative Engagement (Projected)</h2>
             <div className="w-full h-80">
               <ResponsiveContainer>
                 <AreaChart
-                  data={[
-                    { week: 'Week 1', likes: 15, comments: 8, shares: 3 },
-                    { week: 'Week 2', likes: 32, comments: 18, shares: 7 },
-                    { week: 'Week 3', likes: 54, comments: 31, shares: 12 },
-                    { week: 'Week 4', likes: 78, comments: 45, shares: 19 },
-                    { week: 'Week 5', likes: 105, comments: 62, shares: 28 },
-                    { week: 'Week 6', likes: 134, comments: 79, shares: 36 },
-                  ]}
+                  data={(() => {
+                    const totalLikes = selectedBlogPost.likes?.length || 0;
+                    const totalComments = selectedBlogPost.comments?.length || 0;
+                    const totalShares = selectedBlogPost.shares || 0;
+                    return [
+                      { week: 'Week 1', likes: Math.floor(totalLikes * 0.11), comments: Math.floor(totalComments * 0.10), shares: Math.floor(totalShares * 0.08) },
+                      { week: 'Week 2', likes: Math.floor(totalLikes * 0.24), comments: Math.floor(totalComments * 0.23), shares: Math.floor(totalShares * 0.19) },
+                      { week: 'Week 3', likes: Math.floor(totalLikes * 0.40), comments: Math.floor(totalComments * 0.39), shares: Math.floor(totalShares * 0.33) },
+                      { week: 'Week 4', likes: Math.floor(totalLikes * 0.58), comments: Math.floor(totalComments * 0.57), shares: Math.floor(totalShares * 0.53) },
+                      { week: 'Week 5', likes: Math.floor(totalLikes * 0.78), comments: Math.floor(totalComments * 0.78), shares: Math.floor(totalShares * 0.78) },
+                      { week: 'Week 6', likes: totalLikes, comments: totalComments, shares: totalShares },
+                    ];
+                  })()}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                   <XAxis dataKey="week" stroke="#666" />

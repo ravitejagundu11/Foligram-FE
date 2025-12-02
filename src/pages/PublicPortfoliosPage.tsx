@@ -39,6 +39,21 @@ const PublicPortfoliosPage = () => {
     filterPortfolios()
   }, [searchQuery, templateFilter, portfolios])
 
+  // Calculate statistics
+  const stats = {
+    totalPortfolios: portfolios.length,
+    totalCreators: new Set(portfolios.map(p => p.userId)).size,
+    totalViews: portfolios.reduce((sum, p) => sum + (p.views || 0), 0),
+    totalLikes: portfolios.reduce((sum, p) => sum + (p.likes || 0), 0),
+    avgViewsPerPortfolio: portfolios.length > 0 ? Math.round(portfolios.reduce((sum, p) => sum + (p.views || 0), 0) / portfolios.length) : 0,
+    avgLikesPerPortfolio: portfolios.length > 0 ? Math.round(portfolios.reduce((sum, p) => sum + (p.likes || 0), 0) / portfolios.length) : 0,
+    mostPopularTemplate: portfolios.length > 0 ? 
+      portfolios.reduce((acc, p) => {
+        acc[p.templateId] = (acc[p.templateId] || 0) + 1
+        return acc
+      }, {} as Record<string, number>) : {}
+  }
+
   const loadPublicPortfolios = async () => {
     setLoading(true)
     try {
@@ -172,25 +187,59 @@ const PublicPortfoliosPage = () => {
         title="Discover Portfolios"
         subtitle="Explore professional portfolios, connect with creators, and schedule appointments"
         icon={Briefcase}
-        actions={
-          <div className="header-stats">
-            <div className="stat-card">
-              <Briefcase size={24} />
-              <div>
-                <div className="stat-number">{portfolios.length}</div>
-                <div className="stat-label">Portfolios</div>
-              </div>
-            </div>
-            <div className="stat-card">
-              <User size={24} />
-              <div>
-                <div className="stat-number">{new Set(portfolios.map(p => p.userId)).size}</div>
-                <div className="stat-label">Creators</div>
-              </div>
-            </div>
-          </div>
-        }
       />
+
+      {/* Enhanced Statistics Dashboard */}
+      <motion.div
+        className="statistics-dashboard"
+        initial={{ y: -10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="stat-card-enhanced">
+          <div className="stat-icon-wrapper" style={{ backgroundColor: '#dbeafe' }}>
+            <Briefcase size={24} style={{ color: '#1e40af' }} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{stats.totalPortfolios}</div>
+            <div className="stat-label">Total Portfolios</div>
+            <div className="stat-sublabel">Published & Live</div>
+          </div>
+        </div>
+
+        <div className="stat-card-enhanced">
+          <div className="stat-icon-wrapper" style={{ backgroundColor: '#d1fae5' }}>
+            <User size={24} style={{ color: '#065f46' }} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{stats.totalCreators}</div>
+            <div className="stat-label">Active Creators</div>
+            <div className="stat-sublabel">Unique Users</div>
+          </div>
+        </div>
+
+        <div className="stat-card-enhanced">
+          <div className="stat-icon-wrapper" style={{ backgroundColor: '#fef3c7' }}>
+            <ExternalLink size={24} style={{ color: '#92400e' }} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{stats.totalViews.toLocaleString()}</div>
+            <div className="stat-label">Total Views</div>
+            <div className="stat-sublabel">Avg {stats.avgViewsPerPortfolio}/portfolio</div>
+          </div>
+        </div>
+
+        <div className="stat-card-enhanced">
+          <div className="stat-icon-wrapper" style={{ backgroundColor: '#fecaca' }}>
+            <Bell size={24} style={{ color: '#991b1b' }} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{stats.totalLikes.toLocaleString()}</div>
+            <div className="stat-label">Total Likes</div>
+            <div className="stat-sublabel">Avg {stats.avgLikesPerPortfolio}/portfolio</div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Filters */}
       <motion.div
@@ -272,6 +321,26 @@ const PublicPortfoliosPage = () => {
                         ? portfolio.description.substring(0, 100) + '...'
                         : portfolio.description}
                     </p>
+                  )}
+
+                  {/* Portfolio Metrics */}
+                  <div className="portfolio-metrics">
+                    <div className="metric-item">
+                      <ExternalLink size={14} />
+                      <span>{portfolio.views || 0} views</span>
+                    </div>
+                    <div className="metric-item">
+                      <Bell size={14} />
+                      <span>{portfolio.likes || 0} likes</span>
+                    </div>
+                  </div>
+
+                  {/* Published Date */}
+                  {portfolio.publishedAt && (
+                    <div className="published-date">
+                      <Calendar size={12} />
+                      <span>Published {new Date(portfolio.publishedAt).toLocaleDateString()}</span>
+                    </div>
                   )}
                 </div>
 

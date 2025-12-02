@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '@contexts/AuthContext'
@@ -19,7 +19,8 @@ import {
   AlertCircle,
   Check,
   X,
-  Briefcase
+  Briefcase,
+  FileText
 } from 'lucide-react'
 import '../styles/MyPortfolios.css'
 import '../styles/PageHeader.css'
@@ -358,6 +359,37 @@ const MyPortfolios = () => {
     }
   }
 
+  // Calculate statistics from portfolios
+  const stats = useMemo(() => {
+    const published = portfolios.filter(p => p.isPublished)
+    const unpublished = portfolios.filter(p => !p.isPublished)
+    const totalViews = portfolios.reduce((sum, p) => sum + (p.views || 0), 0)
+    const totalLikes = portfolios.reduce((sum, p) => sum + (p.likes || 0), 0)
+    const avgViewsPerPortfolio = portfolios.length > 0 ? Math.round(totalViews / portfolios.length) : 0
+    const avgLikesPerPortfolio = portfolios.length > 0 ? Math.round(totalLikes / portfolios.length) : 0
+
+    return {
+      total: portfolios.length,
+      published: published.length,
+      unpublished: unpublished.length,
+      totalViews,
+      totalLikes,
+      avgViewsPerPortfolio,
+      avgLikesPerPortfolio
+    }
+  }, [portfolios])
+
+  const getTemplateName = (templateId: string) => {
+    const templateNames: Record<string, string> = {
+      'template1': 'Modern Minimalist',
+      'template2': 'Creative Studio',
+      'template3': 'Professional Corporate',
+      'template4': 'Tech Developer',
+      'template5': 'Designer Portfolio'
+    }
+    return templateNames[templateId] || 'Custom Template'
+  }
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A'
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -394,6 +426,60 @@ const MyPortfolios = () => {
           </button>
         }
       />
+
+      {/* Statistics Dashboard */}
+      {portfolios.length > 0 && (
+        <motion.div
+          className="statistics-dashboard"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="stat-card-enhanced">
+            <div className="stat-icon-wrapper" style={{ backgroundColor: '#dbeafe' }}>
+              <Briefcase size={24} style={{ color: '#1e40af' }} />
+            </div>
+            <div className="stat-content">
+              <div className="stat-number">{stats.total}</div>
+              <div className="stat-label">Total Portfolios</div>
+              <div className="stat-sublabel">{stats.published} published, {stats.unpublished} draft</div>
+            </div>
+          </div>
+
+          <div className="stat-card-enhanced">
+            <div className="stat-icon-wrapper" style={{ backgroundColor: '#d1fae5' }}>
+              <Globe size={24} style={{ color: '#065f46' }} />
+            </div>
+            <div className="stat-content">
+              <div className="stat-number">{stats.published}</div>
+              <div className="stat-label">Published</div>
+              <div className="stat-sublabel">{((stats.published / stats.total) * 100).toFixed(0)}% of total</div>
+            </div>
+          </div>
+
+          <div className="stat-card-enhanced">
+            <div className="stat-icon-wrapper" style={{ backgroundColor: '#fef3c7' }}>
+              <TrendingUp size={24} style={{ color: '#92400e' }} />
+            </div>
+            <div className="stat-content">
+              <div className="stat-number">{stats.totalViews.toLocaleString()}</div>
+              <div className="stat-label">Total Views</div>
+              <div className="stat-sublabel">Avg {stats.avgViewsPerPortfolio}/portfolio</div>
+            </div>
+          </div>
+
+          <div className="stat-card-enhanced">
+            <div className="stat-icon-wrapper" style={{ backgroundColor: '#fecaca' }}>
+              <Heart size={24} style={{ color: '#991b1b' }} />
+            </div>
+            <div className="stat-content">
+              <div className="stat-number">{stats.totalLikes.toLocaleString()}</div>
+              <div className="stat-label">Total Likes</div>
+              <div className="stat-sublabel">Avg {stats.avgLikesPerPortfolio}/portfolio</div>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Error State */}
       {error && (
@@ -457,6 +543,10 @@ const MyPortfolios = () => {
                 </div>
                 <h3 className="portfolio-name">{portfolio.name || 'Untitled Portfolio'}</h3>
                 <p className="portfolio-headline">{portfolio.headline}</p>
+                <div className="template-info">
+                  <FileText size={14} />
+                  <span>{getTemplateName(portfolio.templateId)}</span>
+                </div>
               </div>
 
               {/* Portfolio Info */}
