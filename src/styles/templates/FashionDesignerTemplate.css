@@ -1,0 +1,65 @@
+.fashion-template{min-height:100vh;background:linear-gradient(to bottom,#faf5f0 0%,#ffffff 100%);font-family:'Playfair Display',serif;color:#2d2d2d}.fashion-hero{position:relative;min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 20px;background:linear-gradient(135deg,#f8e7dc 0%,#fce4ec 100%)}.hero-elegant-bg{position:absolute;top:0;left:0;right:0;bottom:0;background-image:radial-gradient(circle,rgba(0,0,0,0.03) 1px,transparent 1px);background-size:30px 30px;opacity:0.3}.hero-content-center{position:relative;z-index:1}.fashion-profile-frame{width:200px;height:200px;border-radius:50%;overflow:hidden;margin:0 auto 30px;border:8px solid white;box-shadow:0 20px 60px rgba(0,0,0,0.15)}.fashion-profile-frame img{width:100%;height:100%;object-fit:cover}.fashion-hero h1{font-size:4.5rem;font-weight:700;margin-bottom:15px;letter-spacing:2px}.fashion-tagline{font-size:1.6rem;font-style:italic;color:#666;margin-bottom:35px}.social-icons-elegant{display:flex;gap:20px;justify-content:center;margin-bottom:35px}.social-icons-elegant a{width:50px;height:50px;display:flex;align-items:center;justify-content:center;background:white;border-radius:50%;color:#2d2d2d;transition:all 0.3s;box-shadow:0 4px 15px rgba(0,0,0,0.1)}.social-icons-elegant a:hover{transform:translateY(-5px);box-shadow:0 8px 25px rgba(0,0,0,0.15)}.fashion-cta-buttons{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}.fashion-btn{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;border:none;border-radius:50px;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.3s;font-family:'Inter',sans-serif}.fashion-btn.primary{background:#2d2d2d;color:white}.fashion-btn.primary:hover{background:#000;transform:translateY(-2px)}.fashion-btn.secondary{background:white;color:#2d2d2d;border:2px solid #2d2d2d}.fashion-btn.secondary:hover{background:#2d2d2d;color:white}.fashion-btn.subscribed{background:#4a4a4a;color:white}.fashion-content{max-width:1200px;margin:0 auto;padding:0 20px}.fashion-about,.fashion-collections,.fashion-experience,.fashion-education,.fashion-publications,.fashion-skills,.fashion-testimonials,.fashion-contact{padding:100px 20px;text-align:center}.fashion-section-title{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:60px}.fashion-section-title h2{font-size:3rem;font-weight:700;letter-spacing:1px}.about-elegant{font-size:1.3rem;line-height:2;color:#555;max-width:800px;margin:0 auto;font-style:italic}.collections-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:40px;margin-top:40px}.collection-card{cursor:pointer;transition:transform 0.3s}.collection-card:hover{transform:scale(1.03)}.collection-image{position:relative;height:400px;overflow:hidden;border-radius:8px}.collection-image img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s}.collection-card:hover .collection-image img{transform:scale(1.1)}.collection-overlay{position:absolute;bottom:0;left:0;right:0;padding:30px;background:linear-gradient(to top,rgba(0,0,0,0.8) 0%,transparent 100%);color:white}.collection-overlay h3{font-size:1.8rem;font-weight:600}.collection-info{padding:20px 0;text-align:left}.collection-info p{color:#666;line-height:1.8}.experience-elegant-list{max-width:800px;margin:0 auto;text-align:left}.experience-elegant-card{background:white;padding:35px;margin-bottom:30px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08);border-left:5px solid #2d2d2d}.experience-elegant-card h3{font-size:1.5rem;margin-bottom:10px}.experience-elegant-card h4{font-size:1.2rem;color:#666;margin-bottom:12px}.exp-dates{display:flex;align-items:center;gap:8px;color:#888;margin-bottom:15px}.experience-elegant-card ul{list-style:none;padding:0}.experience-elegant-card li{padding-left:25px;position:relative;margin-bottom:8px;color:#555}.experience-elegant-card li::before{content:'•';position:absolute;left:0;color:#2d2d2d;font-size:1.5rem}.education-elegant-grid,.publications-elegant{max-width:800px;margin:0 auto}.education-elegant-item,.publication-elegant-item{background:white;padding:30px;margin-bottom:25px;border-radius:10px;box-shadow:0 3px 15px rgba(0,0,0,0.07);text-align:left}.education-elegant-item h3,.publication-elegant-item h3{font-size:1.3rem;margin-bottom:10px}.edu-year,.pub-date{color:#888;font-size:0.95rem}.pub-org{color:#2d2d2d;font-weight:600;margin-bottom:8px}.skills-elegant-tags{display:flex;flex-wrap:wrap;gap:15px;justify-content:center}.skill-elegant-tag{padding:12px 28px;background:white;border:2px solid #2d2d2d;border-radius:30px;font-size:1rem;transition:all 0.3s;font-family:'Inter',sans-serif}.skill-elegant-tag:hover{background:#2d2d2d;color:white}.testimonials-elegant-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:35px}.testimonial-elegant-card{background:white;padding:40px;border-radius:12px;box-shadow:0 5px 25px rgba(0,0,0,0.08);text-align:left}.testimonial-elegant-quote{font-size:1.2rem;line-height:1.8;color:#555;font-style:italic;margin-bottom:25px}.testimonial-elegant-author{display:flex;flex-direction:column;gap:5px}.testimonial-elegant-author strong{font-size:1.1rem;color:#2d2d2d}.testimonial-elegant-author span{color:#888}.contact-elegant-button{display:inline-flex;align-items:center;gap:15px;padding:20px 50px;background:#2d2d2d;color:white;text-decoration:none;border-radius:50px;font-size:1.2rem;font-weight:600;transition:all 0.3s;font-family:'Inter',sans-serif;box-shadow:0 5px 25px rgba(0,0,0,0.2)}.contact-elegant-button:hover{background:#000;transform:translateY(-3px)}@media(max-width:768px){.fashion-hero h1{font-size:3rem}.fashion-tagline{font-size:1.3rem}.collections-grid,.testimonials-elegant-grid{grid-template-columns:1fr}.fashion-section-title h2{font-size:2.2rem}}
+
+/* Custom Sections */
+.custom-section {
+  margin-bottom: 60px;
+}
+
+.custom-section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.custom-item-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.custom-item-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  border-color: currentColor;
+}
+
+.custom-item-card h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.custom-subtitle {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.custom-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+
+.custom-date {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  opacity: 0.7;
+}
+
+.custom-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.custom-link:hover {
+  gap: 10px;
+}

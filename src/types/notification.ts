@@ -1,12 +1,15 @@
 export interface Notification {
   id: string
-  type: 'like' | 'comment' | 'reply' | 'share' | 'subscription' | 'mention'
+  type: 'like' | 'comment' | 'reply' | 'share' | 'subscription' | 'mention' | 'appointment' | 'report'
   recipientUsername: string
   actorUsername: string
   actorName: string
   postId?: string
   postTitle?: string
   commentId?: string
+  appointmentId?: string
+  appointmentDate?: string
+  appointmentTime?: string
   message: string
   timestamp: number
   read: boolean
@@ -20,5 +23,8 @@ export interface CreateNotificationData {
   postId?: string
   postTitle?: string
   commentId?: string
+  appointmentId?: string
+  appointmentDate?: string
+  appointmentTime?: string
   message: string
 }

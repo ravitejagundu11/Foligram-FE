@@ -87,7 +87,15 @@ const Header = () => {
                   <Link to="/analytics" className={getLinkClassName('/analytics')}>
                     Analytics
                   </Link>
-                  <Link to="/appointment-management" className={getLinkClassName('/appointment-managemnet')}>
+                  <Link to="/notifications" className={getLinkClassName('/notifications')}>
+                    Notifications
+                    {unreadCount > 0 && (
+                      <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </Link>
+                  <Link to="/appointment-management" className={getLinkClassName('/appointment-management')}>
                     Appointment Management
                   </Link>
                   <Link to="/booking-page" className={getLinkClassName('/booking-page')}>
@@ -110,14 +118,25 @@ const Header = () => {
                       </button>
 
                       {adminOpen && (
-                        <div className="origin-top-right absolute right-0 mt-2 w-52 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                        <div className="origin-top-right absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
                           <div className="py-1">
-                            <Link
-                              to="/admin/user-management"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              onClick={() => setAdminOpen(false)}
-                            >
+                            <Link to="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setAdminOpen(false)}>
+                              Admin Dashboard
+                            </Link>
+                            <Link to="/admin/user-management" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setAdminOpen(false)}>
                               User Management
+                            </Link>
+                            <Link to="/admin/reports" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setAdminOpen(false)}>
+                              Reports
+                            </Link>
+                            <Link to="/admin/moderation" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setAdminOpen(false)}>
+                              Moderation
+                            </Link>
+                            <Link to="/admin/notifications" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setAdminOpen(false)}>
+                              Admin Notifications
+                            </Link>
+                            <Link to="/admin/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setAdminOpen(false)}>
+                              Admin Settings
                             </Link>
                           </div>
                         </div>

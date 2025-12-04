@@ -13,6 +13,7 @@ export interface Template {
 export interface PortfolioConfig {
   id?: string
   templateId: string
+  name?: string
   headline: string
   description: string
   profilePicture?: string
@@ -34,12 +35,14 @@ export interface PortfolioConfig {
     cardStyle: 'rounded' | 'sharp' | 'minimal'
   }
   sections: {
-    about: boolean
-    experience: boolean
     education: boolean
+    experience: boolean
     projects: boolean
+    publications: boolean
     skills: boolean
+    testimonials: boolean
     contact: boolean
+    [key: string]: boolean // Allow dynamic sections
   }
   socialLinks: {
     github?: string
@@ -56,10 +59,19 @@ export interface Portfolio extends PortfolioConfig {
   contactEmail?: string
   slug: string
   isPublished: boolean
+  publishedAt?: string
+  unpublishedAt?: string
   views: number
   likes: number
   createdAt: string
   updatedAt: string
+  // Optional embedded data (used when storing in localStorage)
+  projects?: Project[]
+  skills?: Skill[]
+  testimonials?: Testimonial[]
+  sectionOrder?: string[]
+  sectionNames?: Record<string, string>
+  sectionContent?: Record<string, any[]>
 }
 
 export interface Project {

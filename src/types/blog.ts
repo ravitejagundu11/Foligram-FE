@@ -32,6 +32,8 @@ export interface BlogPost {
   published: boolean
   timestamp: number
   shares: number
+  reported?: boolean
+  reportReason?: string
 }
 
 export interface CreatePostData {

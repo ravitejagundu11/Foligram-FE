@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useUserManagement } from '@contexts/UserManagementContext'
 import { useAuth } from '@contexts/AuthContext'
+import { Users, Search, UserCheck, UserX, Shield, Briefcase } from 'lucide-react'
+import PageHeader from '@components/PageHeader'
 import '../styles/UserManagementPage.css'
+import '../styles/PageHeader.css'
 
 const UserManagementPage = () => {
   const { users, updateUserRole, removeUser } = useUserManagement()
@@ -9,6 +12,8 @@ const UserManagementPage = () => {
   const [editingUser, setEditingUser] = useState<string | null>(null)
   const [selectedRole, setSelectedRole] = useState<'user' | 'admin' | 'recruiter'>('user')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [roleFilter, setRoleFilter] = useState<'all' | 'user' | 'admin' | 'recruiter'>('all')
 
   const handleEditRole = (username: string, currentRole: 'user' | 'admin' | 'recruiter') => {
     setEditingUser(username)
@@ -40,11 +45,134 @@ const UserManagementPage = () => {
     }
   }
 
+  // Filter and search users
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      const matchesSearch =
+        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+
+      const matchesRole = roleFilter === 'all' || user.role === roleFilter
+
+      return matchesSearch && matchesRole
+    })
+  }, [users, searchTerm, roleFilter])
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const totalUsers = users.length
+    const adminCount = users.filter((u) => u.role === 'admin').length
+    const recruiterCount = users.filter((u) => u.role === 'recruiter').length
+    const regularUserCount = users.filter((u) => u.role === 'user').length
+
+    return {
+      total: totalUsers,
+      admins: adminCount,
+      recruiters: recruiterCount,
+      users: regularUserCount,
+    }
+  }, [users])
+
   return (
     <div className="user-management-container">
-      <div className="user-management-header">
-        <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-        <p className="text-gray-600 mt-2">Manage user roles and permissions</p>
+      <PageHeader
+        title="User Management"
+        subtitle="Manage user roles and permissions"
+        icon={Users}
+      />
+
+      {/* Statistics Cards */}
+      <div className="stats-grid">
+        <div className="stat-card stat-card-blue">
+          <div className="stat-icon">
+            <Users size={24} />
+          </div>
+          <div className="stat-content">
+            <p className="stat-label">Total Users</p>
+            <p className="stat-value">{stats.total}</p>
+          </div>
+        </div>
+
+        <div className="stat-card stat-card-purple">
+          <div className="stat-icon">
+            <Shield size={24} />
+          </div>
+          <div className="stat-content">
+            <p className="stat-label">Admins</p>
+            <p className="stat-value">{stats.admins}</p>
+          </div>
+        </div>
+
+        <div className="stat-card stat-card-green">
+          <div className="stat-icon">
+            <Briefcase size={24} />
+          </div>
+          <div className="stat-content">
+            <p className="stat-label">Recruiters</p>
+            <p className="stat-value">{stats.recruiters}</p>
+          </div>
+        </div>
+
+        <div className="stat-card stat-card-orange">
+          <div className="stat-icon">
+            <UserCheck size={24} />
+          </div>
+          <div className="stat-content">
+            <p className="stat-label">Regular Users</p>
+            <p className="stat-value">{stats.users}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Search and Filter Bar */}
+      <div className="search-filter-bar">
+        <div className="search-box">
+          <Search size={20} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search by username, name, or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
+
+        <div className="role-filter-tabs">
+          <button
+            onClick={() => setRoleFilter('all')}
+            className={`role-tab ${roleFilter === 'all' ? 'role-tab-active' : ''}`}
+          >
+            <Users size={16} />
+            All
+          </button>
+          <button
+            onClick={() => setRoleFilter('user')}
+            className={`role-tab ${roleFilter === 'user' ? 'role-tab-active role-tab-user' : ''}`}
+          >
+            <UserCheck size={16} />
+            Users
+          </button>
+          <button
+            onClick={() => setRoleFilter('admin')}
+            className={`role-tab ${roleFilter === 'admin' ? 'role-tab-active role-tab-admin' : ''}`}
+          >
+            <Shield size={16} />
+            Admins
+          </button>
+          <button
+            onClick={() => setRoleFilter('recruiter')}
+            className={`role-tab ${roleFilter === 'recruiter' ? 'role-tab-active role-tab-recruiter' : ''}`}
+          >
+            <Briefcase size={16} />
+            Recruiters
+          </button>
+        </div>
+
+        <div className="filter-results">
+          Showing {filteredUsers.length} of {users.length} users
+        </div>
       </div>
 
       <div className="users-table-container">
@@ -60,7 +188,7 @@ const UserManagementPage = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <tr key={user.username}>
                 <td className="font-medium">{user.username}</td>
                 <td>
@@ -133,9 +261,28 @@ const UserManagementPage = () => {
           </tbody>
         </table>
 
-        {users.length === 0 && (
+        {filteredUsers.length === 0 && (
           <div className="empty-state">
-            <p className="text-gray-500">No users found</p>
+            {users.length === 0 ? (
+              <>
+                <UserX size={48} className="text-gray-400" />
+                <p className="text-gray-500 mt-2">No users found</p>
+              </>
+            ) : (
+              <>
+                <UserX size={48} className="text-gray-400" />
+                <p className="text-gray-500 mt-2">No users match your search criteria</p>
+                <button
+                  onClick={() => {
+                    setSearchTerm('')
+                    setRoleFilter('all')
+                  }}
+                  className="btn-primary mt-3"
+                >
+                  Clear Filters
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>
