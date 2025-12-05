@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Card, CardContent } from '../components/ui/card'
+import { Card, CardContent } from './ui/card'
 import { useNotification } from '@contexts/NotificationContext'
 import { useNavigate } from 'react-router-dom'
 
