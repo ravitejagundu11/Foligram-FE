@@ -298,7 +298,7 @@ const PortfolioConfigComponent = () => {
   // Render the appropriate template for preview
   const renderPreviewTemplate = () => {
     // Sample data for preview when no user data exists
-    const sampleProjects = projects.length > 0 ? projects : [
+    const sampleProjects: Project[] = projects.length > 0 ? projects : [
       {
         id: 'sample-1',
         portfolioId: 'preview',
@@ -343,20 +343,20 @@ const PortfolioConfigComponent = () => {
       }
     ]
 
-    const sampleSkills = skills.length > 0 ? skills : [
-      { id: 's1', portfolioId: 'preview', name: 'React', category: 'Frontend', proficiency: 5, order: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 's2', portfolioId: 'preview', name: 'TypeScript', category: 'Frontend', proficiency: 5, order: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 's3', portfolioId: 'preview', name: 'Node.js', category: 'Backend', proficiency: 4, order: 2, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 's4', portfolioId: 'preview', name: 'Python', category: 'Backend', proficiency: 4, order: 3, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 's5', portfolioId: 'preview', name: 'MongoDB', category: 'Database', proficiency: 4, order: 4, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 's6', portfolioId: 'preview', name: 'PostgreSQL', category: 'Database', proficiency: 4, order: 5, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 's7', portfolioId: 'preview', name: 'Docker', category: 'DevOps', proficiency: 3, order: 6, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 's8', portfolioId: 'preview', name: 'AWS', category: 'DevOps', proficiency: 3, order: 7, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 's9', portfolioId: 'preview', name: 'Git', category: 'Tools', proficiency: 5, order: 8, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 's10', portfolioId: 'preview', name: 'Figma', category: 'Tools', proficiency: 4, order: 9, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+    const sampleSkills: Skill[] = skills.length > 0 ? skills : [
+      { id: 's1', portfolioId: 'preview', name: 'React', category: 'Frontend' as const, proficiency: 5 as const, order: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 's2', portfolioId: 'preview', name: 'TypeScript', category: 'Frontend' as const, proficiency: 5 as const, order: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 's3', portfolioId: 'preview', name: 'Node.js', category: 'Backend' as const, proficiency: 4 as const, order: 2, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 's4', portfolioId: 'preview', name: 'Python', category: 'Backend' as const, proficiency: 4 as const, order: 3, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 's5', portfolioId: 'preview', name: 'MongoDB', category: 'Database' as const, proficiency: 4 as const, order: 4, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 's6', portfolioId: 'preview', name: 'PostgreSQL', category: 'Database' as const, proficiency: 4 as const, order: 5, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 's7', portfolioId: 'preview', name: 'Docker', category: 'DevOps' as const, proficiency: 3 as const, order: 6, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 's8', portfolioId: 'preview', name: 'AWS', category: 'DevOps' as const, proficiency: 3 as const, order: 7, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 's9', portfolioId: 'preview', name: 'Git', category: 'Tools' as const, proficiency: 5 as const, order: 8, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 's10', portfolioId: 'preview', name: 'Figma', category: 'Tools' as const, proficiency: 4 as const, order: 9, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
     ]
 
-    const sampleTestimonials = testimonials.length > 0 ? testimonials : [
+    const sampleTestimonials: Testimonial[] = testimonials.length > 0 ? testimonials : [
       {
         id: 't1',
         portfolioId: 'preview',
@@ -366,6 +366,7 @@ const PortfolioConfigComponent = () => {
         content: 'Working with this professional was an absolute pleasure. Their attention to detail and technical expertise delivered results beyond our expectations.',
         avatar: 'https://i.pravatar.cc/150?img=5',
         rating: 5,
+        order: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       },
@@ -378,6 +379,7 @@ const PortfolioConfigComponent = () => {
         content: 'Outstanding work quality and excellent communication throughout the project. Highly recommend for any complex technical challenges.',
         avatar: 'https://i.pravatar.cc/150?img=12',
         rating: 5,
+        order: 1,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       },
@@ -390,6 +392,7 @@ const PortfolioConfigComponent = () => {
         content: 'Exceptional problem-solving skills and innovative approach. Delivered the project on time with remarkable quality.',
         avatar: 'https://i.pravatar.cc/150?img=9',
         rating: 5,
+        order: 2,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
